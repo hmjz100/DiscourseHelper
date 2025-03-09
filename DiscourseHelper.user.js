@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Discourse 助手
 // @namespace    github.com/hmjz100
-// @version      1.0.0
+// @version      1.0.1
 // @author       Hmjz100
 // @description  重构 “linuxdo 增强插件”，再次以脚本方式为您呈现！
 // @license      MIT
@@ -18,6 +18,7 @@
 
 (function DiscourseHelper() {
 	'use strict';
+	let data = null;
 
 	if (document.getElementById('challenge-form')) {
 		return;
@@ -27,17 +28,21 @@
 		initSettings() {
 			let defaultSettings = {
 				topicNewTab: false,
-				bigCloseButton: false,
+				bigCloseButton: true,
 				replaceEmoji: "fluentui",
 				panguText: false,
-				optimizeEditor: false,
+				optimizeEditor: true,
 				japaneseEditor: false,
-				previewTopic: false,
-				filterByOP: false,
-				floorTopic: false,
+				previewTopic: true,
+				filterByOP: true,
+				autoReader: false,
+				autoReaderSpeed: 2,
+				autoReaderWait: 3,
+				floorTopic: true,
 				showTopicTime: false,
-				showNewTab: false,
+				showNewTab: true,
 				autoHeight: false,
+				switchReply: true,
 			};
 
 			for (let key in defaultSettings) {
@@ -302,6 +307,7 @@
 
 			// 其它链接
 			waitForKeyElements(`
+				li:not([class]) > a[href*="/t/topic/"],
 				div > a[href*="/t/topic/"]:not(.arrow, .widget-link, .start-date, .now-date),
 				p > a[href*="/t/topic/"],
 				.read > a[href*="/t/topic/"],
@@ -399,7 +405,6 @@
 				pangu.spacingElementByTagName('p');
 				pangu.spacingElementByTagName('span');
 			}, 1500)
-			// window.onload = pangu.autoSpacingPage();
 		},
 		optimizeEditor() {
 			waitForKeyElements("#reply-control .save-or-cancel .create", (element) => {
@@ -511,6 +516,7 @@
 				status.prepend(button)
 			})
 			waitForKeyElements(`
+				li:not([class]) > a[href*="/t/topic/"],
 				div.topic a[href*="/t/top"],
 				div.title a[href*="/t/top"],
 				p > a[href*="/t/topic/"]
@@ -591,7 +597,14 @@
 					overflow-y:auto!important;
 				}
 			</style>`);
-		}
+		},
+		switchReply() {
+			waitForKeyElements("nav.post-controls .show-replies", (element) => {
+				if (element.prop("clicked")) return;
+				element.click();
+				element.prop("clicked", true);
+			})
+		},
 	}
 
 	base.initSettings()
@@ -628,6 +641,9 @@
 	}
 	if (GM_getValue("autoHeight")) {
 		base.autoHeight();
+	}
+	if (GM_getValue("switchReply")) {
+		base.switchReply();
 	}
 
 	waitForKeyElements('body', (element) => {
@@ -746,57 +762,108 @@
 		toggleBackToTop();
 
 		function createFloatingButton(config) {
-			let { id, title, icon, onClick, checkCondition, css } = config;
-			let styleElement = null;
-			let isEnabled = false;
+			let { id, title, icon, onClick, onStart, onCheck } = config;
+			if (!id || !title || !icon) return;
 			let button = $(`
 				<div id="${id}" data-title="${title}" class="floating-button" style="display: none;">
 					<svg><use xlink:href="#${icon}"/></svg>
 				</div>
 			`);
-			let handleClick = () => {
-				isEnabled = !isEnabled;
-				onClick({ isEnabled, button, styleElement });
+			if (typeof onStart === "function") {
+				onStart({ id, title, icon, button });
+			}
+			if (typeof onClick === "function") {
+				button.on("click", (event) => {
+					onClick({ event, button });
+				});
+			}
+			if (typeof onCheck === "function") {
+				let observer = new MutationObserver(() => {
+					if (onCheck()) {
+						button.fadeIn();
+					} else {
+						button.fadeOut();
+					}
+				});
+				observer.observe(document.body, { childList: true, subtree: true });
+				if (onCheck()) {
+					button.show();
+				}
+			} else {
+				button.attr("style", "")
+			}
+			buttons.append(button);
+		}
 
-				if (css) {
-					button.toggleClass("hover");
+		if (GM_getValue("filterByOP")) {
+			let styleElement = null;
+			let isEnabled = false;
+			createFloatingButton({
+				id: 'filterByOP',
+				title: '只看题主',
+				icon: 'far-comments',
+				onClick: ({ button }) => {
+					isEnabled = !isEnabled;
+					button.find("use").attr("xlink:href", isEnabled ? "#far-comment" : "#far-comments");
 					if (isEnabled && !styleElement) {
-						styleElement = $(`<style>${css}</style>`);
+						styleElement = $(`<style>
+							.post-stream .topic-post { display: none !important; }
+							.post-stream .topic-post.topic-owner { display: block !important; }
+						</style>`);
 						$("head").append(styleElement);
 					} else if (!isEnabled && styleElement) {
 						styleElement.remove();
 						styleElement = null;
 					}
-				}
-			};
-			button.on("click", handleClick);
-			let observer = new MutationObserver(() => {
-				if (checkCondition()) {
-					button.show();
-				} else {
-					button.hide();
-				}
+				},
+				onCheck: () => $(".post-stream").length > 0 && $(".post-stream .topic-post").length > 0
 			});
-			observer.observe(document.body, { childList: true, subtree: true });
-			if (checkCondition()) {
-				button.show();
-			}
-			buttons.append(button)
 		}
 
-		if (GM_getValue("filterByOP")) {
+		if (GM_getValue("autoReader") && GM_getValue("autoReaderWait") && GM_getValue("autoReaderSpeed") && GM_getValue("autoReaderSpeed") > 0) {
+			let isEnabled = false;
+			let timeoutId = null; // 定时器 ID
+
+			function autoScroll(button) {
+				if (isEnabled) {
+					window.scrollBy(0, GM_getValue("autoReaderSpeed"));
+					let scrollTop = $(window).scrollTop();
+					let scrollHeight = $(document).height();
+					let windowHeight = $(window).height();
+					if (scrollTop + windowHeight >= (scrollHeight - 300)) {
+						if (!timeoutId) {
+							timeoutId = setTimeout(() => {
+								isEnabled = false;
+								timeoutId = null;
+								button.find("use").attr("xlink:href", "#play");
+							}, GM_getValue("autoReaderWait"));
+						}
+					} else {
+						if (timeoutId) {
+							clearTimeout(timeoutId);
+							timeoutId = null;
+						}
+					}
+					requestAnimationFrame(() => autoScroll(button));
+				}
+			}
 			createFloatingButton({
-				id: 'filterByOP',
-				title: '只看题主',
-				icon: 'far-comments',
-				css: `
-					.post-stream .topic-post { display: none !important; }
-					.post-stream .topic-post.topic-owner { display: block !important; }
-				`,
-				onClick: ({ isEnabled, button }) => {
-					button.find("use").attr("xlink:href", isEnabled ? "#far-comment" : "#far-comments");
-				},
-				checkCondition: () => $(".post-stream").length > 0 && $(".post-stream .topic-post").length > 0
+				id: 'autoReader',
+				title: '自动滚动',
+				icon: 'play',
+				onClick: ({ button }) => {
+					isEnabled = !isEnabled;
+					if (isEnabled) {
+						autoScroll(button);
+						button.find("use").attr("xlink:href", "#pause");
+					} else {
+						if (timeoutId) {
+							clearTimeout(timeoutId);
+							timeoutId = null;
+						}
+						button.find("use").attr("xlink:href", "#play");
+					}
+				}
 			});
 		}
 
@@ -805,7 +872,7 @@
 			title: '新建话题',
 			icon: 'far-pen-to-square',
 			onClick: () => $("#create-topic").click(),
-			checkCondition: () => $("#create-topic").length > 0
+			onCheck: () => $("#create-topic").length > 0
 		});
 
 		createFloatingButton({
@@ -813,7 +880,7 @@
 			title: '回复话题',
 			icon: 'reply',
 			onClick: () => $(".reply-to-post").click(),
-			checkCondition: () => {
+			onCheck: () => {
 				$(".reply-to-post").hide();
 				return $(".reply-to-post").length > 0
 			}
@@ -833,8 +900,36 @@
 						justify-content: center;
 						align-items: center;
 					}
-					#dialog-holder .dialog-content {
-						min-width: 500px;
+					#dialog-holder .dialog-content,
+					#dialog-holder .dialog-content > div {
+						min-width: auto;
+					}
+					#dialog-holder .dialog-content a {
+						margin: 0;
+					}
+					#dialog-holder .dialog-content .dialog-header {
+						justify-content: space-between;
+					}
+					#dialog-holder .dialog-content .dialog-header > .title {
+						font-size: var(--font-up-3);
+						font-weight: 600;
+					}
+					#dialog-holder .dialog-content .dialog-header > .date {
+						color: #666;
+						font-family: serif;
+					}
+					#dialog-holder .dialog-content .dialog-body {
+						max-height: 600px;
+						padding: 15px 15px 0;
+					}
+					#dialog-holder .dialog-content .dialog-body .controls > * {
+						display: flex;
+						justify-content: space-between;
+						padding: 10px 0;
+						align-items: center;
+					}
+					#dialog-holder .dialog-content .dialog-body .controls select {
+						padding: 5px;
 					}
 					#dialog-holder .dialog-content .dialog-footer {
 						display: flex;
@@ -846,47 +941,14 @@
 					#dialog-holder .dialog-content .dialog-footer .btn {
 						margin: 0 0 var(--btn-bottom-margin) 1em;
 					}
-					#dialog-holder .dialog-content a {
-						margin: 0;
-					}
-					#dialog-holder .dialog-content .dialog-body {
-						max-height: 600px;
-						padding: 15px 15px 0;
-					}
-					#dialog-holder .dialog-content .dialog-body .main {
-						display: flex;
-						justify-content: space-between;
-						align-items: center;
-						margin-bottom: 1em;
-					}
-					#dialog-holder .dialog-content .dialog-body .main > .title {
-						font-size: var(--font-up-3);
-						font-weight: 600;
-					}
-					#dialog-holder .dialog-content .dialog-body .main > .date {
-						color: #666;
-						font-family: serif;
-					}
-
-					#dialog-holder .dialog-content .dialog-body .controls > * {
-						display: flex;
-						justify-content: space-between;
-						padding: 10px 0;
-						align-items: center;
-					}
-
-					#dialog-holder .dialog-content .dialog-body .controls select {
-						padding: 5px;
-					}
 				</style>
 				<div class="dialog-overlay"></div>
 				<div class="dialog-content form-vertical">
+					<div class="dialog-header">
+						<span class="title">设置</span>
+						<span class="date">/</span>
+					</div>
 					<div class="dialog-body control-group">
-						<div class="main">
-							<span class="title">设置</span>
-							<span class="date">/</span>
-						</div>
-						<hr>
 						<div class="controls">
 							<label class="checkbox-label">
 								<span>话题 - 在新标签页中打开链接<br/><small>仅适用于“列表项目”元素中的链接</small></span>
@@ -907,6 +969,10 @@
 							<label class="checkbox-label">
 								<span>帖子 - 限高<br/><small>限制帖子文本的高度，超出则独立显示滚动条</small></span>
 								<input type="checkbox" data-setting="autoHeight">
+							</label>
+							<label class="checkbox-label">
+								<span>帖子 - 展开回复<br/><small>自动展开帖子回复列表</small></span>
+								<input type="checkbox" data-setting="switchReply">
 							</label>
 							<label class="select-label">
 								<span>页面 - 表情替换<br/><small>切换 Emoji 表情的风格</small></span>
@@ -941,8 +1007,20 @@
 								<input type="checkbox" data-setting="japaneseEditor">
 							</label>
 							<label class="checkbox-label">
-								<span>菜单 - 只看题主<br/><small>在浏览帖子时会在右下菜单添加此按钮<br/>如果话题帖子较多，则可能会导致浏览器卡顿</small></span>
+								<span>菜单 - 只看题主<br/><small>在浏览帖子时会在右下菜单显示此按钮<br/>如果话题帖子较多，则可能会导致浏览器卡顿</small></span>
 								<input type="checkbox" data-setting="filterByOP">
+							</label>
+							<label class="checkbox-label">
+								<span>菜单 - 自动滚动<br/><small>启用后可通过右下菜单中的按钮控制页面自动滚动状态</small></span>
+								<input type="checkbox" data-setting="autoReader">
+							</label>
+							<label class="checkbox-label">
+								<span>功能 - 自动滚动 - 速度<br/><small>滚动的速度</small></span>
+								<input type="number" data-setting="autoReaderSpeed">
+							</label>
+							<label class="checkbox-label">
+								<span>功能 - 自动滚动 - 等待<br/><small>滚动到最底部后要等待几秒再停止</small></span>
+								<input type="number" data-setting="autoReaderWait">
 							</label>
 						</div>
 						<hr>
@@ -1045,6 +1123,21 @@
 				let settingValue = GM_getValue(settingKey);
 				$(this).val(settingValue);
 			});
+			helperSettings.find(".controls input[type='number']").each(function () {
+				let settingKey = $(this).data("setting");
+				let settingValue = GM_getValue(settingKey);
+				if (settingValue !== undefined && settingValue !== null) {
+					$(this).val(Number(settingValue));
+				}
+			});
+			helperSettings.find(".controls input[type='text']").each(function () {
+				let settingKey = $(this).data("setting");
+				let settingValue = GM_getValue(settingKey);
+				if (settingValue !== undefined && settingValue !== null) {
+					$(this).val(settingValue);
+				}
+			});
+
 			helperSettings.find(".controls input[type='checkbox']").on("change", function () {
 				let settingKey = $(this).data("setting");
 				let newValue = $(this).is(":checked");
@@ -1055,8 +1148,20 @@
 				let newValue = $(this).val();
 				GM_setValue(settingKey, newValue);
 			});
+			helperSettings.find(".controls input[type='number']").on("change", function () {
+				let settingKey = $(this).data("setting");
+				let newValue = $(this).val();
+				if (!isNaN(newValue)) {
+					GM_setValue(settingKey, Number(newValue));
+				}
+			});
+			helperSettings.find(".controls input[type='text']").on("change", function () {
+				let settingKey = $(this).data("setting");
+				let newValue = $(this).val();
+				GM_setValue(settingKey, newValue);
+			});
 			timer = setInterval(() => {
-				helperSettings.find(".dialog-content .dialog-body .main > .date").text(formatDate(Date.now()))
+				helperSettings.find(".dialog-content .dialog-header > .date").text(formatDate(Date.now()))
 			}, 500)
 			$("body").append(helperSettings)
 		})
