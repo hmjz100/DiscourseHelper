@@ -1,19 +1,22 @@
 // ==UserScript==
-// @name         Discourse 助手
-// @namespace    github.com/hmjz100
-// @version      1.0.3
-// @author       Hmjz100
-// @description  重构 “linuxdo 增强插件”，再次以脚本方式为您呈现！
-// @license      MIT
-// @icon         data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEl0lEQVRYw72Xe0yVZRzHv8SdUhk2FYGOnLwsQKYjZ5epZQPsQirOUWbFvJXmpWmWNXG6rFjkYGVmMkomTkzlAIdL4H3VzHSWy+a0ieQllRREBQ+Xcz79cY5LD+/hqj3bb2d7n+d9Pp/n977neX6v1PkWKClZUp6kE5JaJOEKh6TTknZIel1SsO5ii5C0QdLF24AdRa2kXEnmnsIzJDV3AewerZLWdAdsknSoB2D3OOTKZKfaY5JqOprUS8JbXl2R+FtSTEfwwZKueprk0YD7WRQ8gI39zZSGD6XCNIz8CDMr+g4kPqAP3rqvI4mLksI9wf0kHTe6Mco/kJwBkZw0x3J+ZAw1Y4ZQlxBB/fPhNE4ZhG2imevPRLI/KpQJ/v6deRyGbZ3RDUm9gvltUAzV0cO5kBBJ/dRQGt6OxfbVFFr2LsN+MgtH1Rc4fk+HkvmwMpH04f07kljhDo/xBD8eGUtVXBS1yWHceGMYTcULoGEb8D1QDpS6osx1rQwuZlP4bgL+ngVuShp4u4DFfZDJ14+DpmiqRkRRN2UgDe+Nxn4uG6gAezE0FRhHs8UlVMn7WSntZeHLW/BQSTb3ARn9Iqh+JJZ/XgynYdloHLV5ztV5AruHw0p1az6Bi55tb7N6QJLmuneG+vhy2BTNuacGc2OmGfuptc50dxZ+K7Ay41g6mjDZk8QLklTm3pHSO4TqYbFcTgrFlvuqM+3Nlq4LOErYfCYd5XyCgiONBLLl2iDu6EgLCeNCXBTXUs3Yz24ASroObyoAu5Ujl9ai0lUoJc1I4KiMUrM8JIzLTz5M40fjnS9Ud1bfVACtxfxV9w3e1tlotcVI4LqhQFpIGPXjTDRtSXX+tboDdwmcvJKDtqegTUdRYLCRRFuBJcGh1I8ZROvepT0TsFvZfe5zlJ+MCs6gAUM6JzDGvzcX4iKx717SMwFKyTiWhrZMRwWXUb82L2K9oYC3vNhlCofc17ov0GyBliLiKl5C21ehTZeQf5A761d52qmm+femceHTQBG0FHZr9flVa1DeWFS6B63ea8RZ51EgSF788XgknP8aHMVdfva11/MJK5qEtsxGu0DJ7xhxEj0KRMmHujnjoGVH1zLgsGK7uY0ndqaivHhUcgRtPI+CerkzalyFrrHA9IBAqPzgzneg2WK8JzRboLUYKOXElW+JKX8Z5Y1HlhJUARr/ihEj49ZhZCjw6SgzNOY7099a5Pxt3gpN+eAo+u8YdpRAazGn63KZf2gxvt/Fo82TUeF+tBOU+rHR/Nck9W1X4EDmDGAfYOVP22ZWnsok9oc1DNmXSdLPi5nzyzzmHJxLyo+zGFE+Fe+t8SgvGW1fjyquIito4kJPh9DS22uBNgP6Bvhx8KfPyDiwjrHrP0SL3kRTZ6Gx09BzC1DWNlRciaxlyFqISipR+WG00+YEpxWhoaM8wfe4V0NtBvn4eOMX0gfJx3gS7yA0MglNWobmZaO3ctDMLJQwC5mi2ytCTkl6sEOBexRVkh4yKkb/D/geSf08VcP3EtwgaXlHHyP3AnxWUmZ7q77bAjWSjrj29kRJvp39DvwXHVKWNlLwEiAAAAAASUVORK5CYII=
-// @match        *://linux.do/*
-// @require      https://unpkg.com/jquery@3.7.1/dist/jquery.min.js
-// @require      https://unpkg.com/pangu@4.0.7/dist/browser/pangu.js
-// @require      https://unpkg.com/marked@14.1.4/marked.min.js
-// @grant        unsafeWindow
-// @grant        window.close
-// @grant        GM_getValue
-// @grant        GM_setValue
+// @name                Discourse 助手
+// @namespace           github.com/hmjz100
+// @version             1.0.4
+// @author              Hmjz100
+// @description         重构 “linuxdo 增强插件”，再次以脚本方式为您呈现！
+// @license             MIT
+// @icon                data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEl0lEQVRYw72Xe0yVZRzHv8SdUhk2FYGOnLwsQKYjZ5epZQPsQirOUWbFvJXmpWmWNXG6rFjkYGVmMkomTkzlAIdL4H3VzHSWy+a0ieQllRREBQ+Xcz79cY5LD+/hqj3bb2d7n+d9Pp/n977neX6v1PkWKClZUp6kE5JaJOEKh6TTknZIel1SsO5ii5C0QdLF24AdRa2kXEnmnsIzJDV3AewerZLWdAdsknSoB2D3OOTKZKfaY5JqOprUS8JbXl2R+FtSTEfwwZKueprk0YD7WRQ8gI39zZSGD6XCNIz8CDMr+g4kPqAP3rqvI4mLksI9wf0kHTe6Mco/kJwBkZw0x3J+ZAw1Y4ZQlxBB/fPhNE4ZhG2imevPRLI/KpQJ/v6deRyGbZ3RDUm9gvltUAzV0cO5kBBJ/dRQGt6OxfbVFFr2LsN+MgtH1Rc4fk+HkvmwMpH04f07kljhDo/xBD8eGUtVXBS1yWHceGMYTcULoGEb8D1QDpS6osx1rQwuZlP4bgL+ngVuShp4u4DFfZDJ14+DpmiqRkRRN2UgDe+Nxn4uG6gAezE0FRhHs8UlVMn7WSntZeHLW/BQSTb3ARn9Iqh+JJZ/XgynYdloHLV5ztV5AruHw0p1az6Bi55tb7N6QJLmuneG+vhy2BTNuacGc2OmGfuptc50dxZ+K7Ay41g6mjDZk8QLklTm3pHSO4TqYbFcTgrFlvuqM+3Nlq4LOErYfCYd5XyCgiONBLLl2iDu6EgLCeNCXBTXUs3Yz24ASroObyoAu5Ujl9ai0lUoJc1I4KiMUrM8JIzLTz5M40fjnS9Ud1bfVACtxfxV9w3e1tlotcVI4LqhQFpIGPXjTDRtSXX+tboDdwmcvJKDtqegTUdRYLCRRFuBJcGh1I8ZROvepT0TsFvZfe5zlJ+MCs6gAUM6JzDGvzcX4iKx717SMwFKyTiWhrZMRwWXUb82L2K9oYC3vNhlCofc17ov0GyBliLiKl5C21ehTZeQf5A761d52qmm+femceHTQBG0FHZr9flVa1DeWFS6B63ea8RZ51EgSF788XgknP8aHMVdfva11/MJK5qEtsxGu0DJ7xhxEj0KRMmHujnjoGVH1zLgsGK7uY0ndqaivHhUcgRtPI+CerkzalyFrrHA9IBAqPzgzneg2WK8JzRboLUYKOXElW+JKX8Z5Y1HlhJUARr/ihEj49ZhZCjw6SgzNOY7099a5Pxt3gpN+eAo+u8YdpRAazGn63KZf2gxvt/Fo82TUeF+tBOU+rHR/Nck9W1X4EDmDGAfYOVP22ZWnsok9oc1DNmXSdLPi5nzyzzmHJxLyo+zGFE+Fe+t8SgvGW1fjyquIito4kJPh9DS22uBNgP6Bvhx8KfPyDiwjrHrP0SL3kRTZ6Gx09BzC1DWNlRciaxlyFqISipR+WG00+YEpxWhoaM8wfe4V0NtBvn4eOMX0gfJx3gS7yA0MglNWobmZaO3ctDMLJQwC5mi2ytCTkl6sEOBexRVkh4yKkb/D/geSf08VcP3EtwgaXlHHyP3AnxWUmZ7q77bAjWSjrj29kRJvp39DvwXHVKWNlLwEiAAAAAASUVORK5CYII=
+// @match               *://linux.do/*
+// @require             https://unpkg.com/jquery@3.7.1/dist/jquery.min.js
+// @require             https://unpkg.com/pangu@4.0.7/dist/browser/pangu.js
+// @require             https://unpkg.com/marked@15.0.7/marked.min.js
+// @require             https://unpkg.com/katex@0.16.21/dist/katex.min.js
+// @resource katexStyle https://unpkg.com/katex@0.16.21/dist/katex.min.css
+// @grant               unsafeWindow
+// @grant               window.close
+// @grant               GM_getValue
+// @grant               GM_setValue
+// @grant               GM_getResourceText
 // ==/UserScript==
 
 (function DiscourseHelper() {
@@ -26,22 +29,23 @@
 	let base = {
 		initSettings() {
 			let defaultSettings = {
-				topicNewTab: false,
-				bigCloseButton: true,
+				topicNewTab: "false",
+				bigCloseButton: "true",
 				replaceEmoji: "fluentui",
-				panguText: false,
-				optimizeEditor: true,
-				japaneseEditor: false,
-				previewTopic: true,
-				filterByOP: true,
-				autoReader: false,
-				autoReaderSpeed: 2,
-				autoReaderWait: 3,
-				floorTopic: true,
-				showTopicTime: false,
-				showNewTab: true,
-				autoHeight: false,
-				switchReply: true,
+				replaceTheme: "false",
+				panguText: "false",
+				optimizeEditor: "true",
+				japaneseEditor: "false",
+				previewTopic: "true",
+				filterByOP: "true",
+				autoReader: "false",
+				autoReaderSpeed: "2",
+				autoReaderWait: "3",
+				floorTopic: "true",
+				showTopicTime: "false",
+				showNewTab: "true",
+				autoHeight: "false",
+				switchReply: "true",
 			};
 
 			for (let key in defaultSettings) {
@@ -144,6 +148,10 @@
 						elempost.find("a.lightbox").each(function () {
 							let content = $(this).html();
 							$(this).replaceWith(content);
+						});
+						elempost.find(".math").each(function () {
+							let content = $(this);
+							katex.render(content.html(), content[0]);
 						});
 						elempost.find("a[href]").each(function () {
 							let element = $(this)
@@ -269,6 +277,386 @@
 						}
 					}
 				});
+			}
+		},
+		replaceTheme(style) {
+			console.log(style)
+			let themeStyles = [
+				{
+					label: "discourse",
+					content: `
+					<link href="https://meta.discourse.org/stylesheets/color_definitions_default-light_34_331_8859e177995550cdefabed73834277177e66b044.css?__ws=meta.discourse.org" media="all" rel="stylesheet" class="light-scheme" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop" />
+					<link href="https://meta.discourse.org/stylesheets/automation_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="automation" />
+					<link href="https://meta.discourse.org/stylesheets/chat_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="chat" />
+					<link href="https://meta.discourse.org/stylesheets/checklist_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="checklist" />
+					<link href="https://meta.discourse.org/stylesheets/discourse-activity-pub_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="discourse-activity-pub" />
+					<link href="https://meta.discourse.org/stylesheets/discourse-ai_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="discourse-ai" />
+					<link href="https://meta.discourse.org/stylesheets/discourse-assign_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="discourse-assign" />
+					<link href="https://meta.discourse.org/stylesheets/discourse-cakeday_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="discourse-cakeday" />
+					<link href="https://meta.discourse.org/stylesheets/discourse-customer-flair-plugin_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="discourse-customer-flair-plugin" />
+					<link href="https://meta.discourse.org/stylesheets/discourse-data-explorer_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="discourse-data-explorer" />
+					<link href="https://meta.discourse.org/stylesheets/discourse-details_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="discourse-details" />
+					<link href="https://meta.discourse.org/stylesheets/discourse-doc-categories_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="discourse-doc-categories" />
+					<link href="https://meta.discourse.org/stylesheets/discourse-gamification_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="discourse-gamification" />
+					<link href="https://meta.discourse.org/stylesheets/discourse-lazy-videos_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="discourse-lazy-videos" />
+					<link href="https://meta.discourse.org/stylesheets/discourse-local-dates_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="discourse-local-dates" />
+					<link href="https://meta.discourse.org/stylesheets/discourse-math_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="discourse-math" />
+					<link href="https://meta.discourse.org/stylesheets/discourse-narrative-bot_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="discourse-narrative-bot" />
+					<link href="https://meta.discourse.org/stylesheets/discourse-new-features-feeds_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="discourse-new-features-feeds" />
+					<link href="https://meta.discourse.org/stylesheets/discourse-presence_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="discourse-presence" />
+					<link href="https://meta.discourse.org/stylesheets/discourse-reactions_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="discourse-reactions" />
+					<link href="https://meta.discourse.org/stylesheets/discourse-rewind_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="discourse-rewind" />
+					<link href="https://meta.discourse.org/stylesheets/discourse-saved-searches_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="discourse-saved-searches" />
+					<link href="https://meta.discourse.org/stylesheets/discourse-solved_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="discourse-solved" />
+					<link href="https://meta.discourse.org/stylesheets/discourse-templates_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="discourse-templates" />
+					<link href="https://meta.discourse.org/stylesheets/discourse-theme-install-button_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="discourse-theme-install-button" />
+					<link href="https://meta.discourse.org/stylesheets/discourse-topic-voting_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="discourse-topic-voting" />
+					<link href="https://meta.discourse.org/stylesheets/discourse-translator_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="discourse-translator" />
+					<link href="https://meta.discourse.org/stylesheets/discourse-user-notes_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="discourse-user-notes" />
+					<link href="https://meta.discourse.org/stylesheets/discourse-yearly-review_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="discourse-yearly-review" />
+					<link href="https://meta.discourse.org/stylesheets/footnote_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="footnote" />
+					<link href="https://meta.discourse.org/stylesheets/hosted-site_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="hosted-site" />
+					<link href="https://meta.discourse.org/stylesheets/poll_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="poll" />
+					<link href="https://meta.discourse.org/stylesheets/spoiler-alert_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="spoiler-alert" />
+					<link href="https://meta.discourse.org/stylesheets/chat_desktop_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="chat_desktop" />
+					<link href="https://meta.discourse.org/stylesheets/discourse-ai_desktop_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="discourse-ai_desktop" />
+					<link href="https://meta.discourse.org/stylesheets/discourse-gamification_desktop_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="discourse-gamification_desktop" />
+					<link href="https://meta.discourse.org/stylesheets/discourse-reactions_desktop_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="discourse-reactions_desktop" />
+					<link href="https://meta.discourse.org/stylesheets/discourse-topic-voting_desktop_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="discourse-topic-voting_desktop" />
+					<link href="https://meta.discourse.org/stylesheets/poll_desktop_3af68c9996ce3f84cd9b5d41d18459bf1f7bda5b.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="poll_desktop" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_344_3cc0446e65c6e5147a205cae61708c978625c5a3.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="344" data-theme-name="category banners" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_264_29411c9f96c115ef3188fe5145c1913a2a96f3ac.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="264" data-theme-name="custom header links (icons)" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_403_5c27652de76b766591793ea76d41e2ece9fdb6b3.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="403" data-theme-name="density toggle" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_129_a321276f45b1012a754f25a848c4e344eebf62ec.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="129" data-theme-name="discotoc" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_334_f7589af88b7e9537234a9b3588a5c45aa7d09f2a.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="334" data-theme-name="discourse experiments" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_195_23ab6199259e7621fcf76ac868ffe79cd62f0151.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="195" data-theme-name="discourse gifs" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_171_6fd27e64c23b0a289330c469edde67336c864802.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="171" data-theme-name="discourse icon" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_286_0c54656592bb330c8c7b159e2fd63a567892700f.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="286" data-theme-name="discourse mermaid" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_233_b60f8e35c8a398a269cabd3306d91400ff7e7c30.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="233" data-theme-name="dismissable hiring banner" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_222_bb36a3cc70526f510106c37ec3833f7bd245b029.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="222" data-theme-name="docs card filter" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_304_d6eaba08278379cd87d66572e1e300654c074791.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="304" data-theme-name="experimental filter component" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_280_039db8dc836c0327c7bd84557699b7d5ae1a89ee.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="280" data-theme-name="full width" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_191_680b590cdfca9569d0dc0a6126e2e447869f948a.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="191" data-theme-name="github status indicators" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_341_ec9766a240a66f5bd443ce962ee81654c3c8a866.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="341" data-theme-name="insert video" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_351_9c4ed76214f428fffa6cd687b4faa4c2c4522c44.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="351" data-theme-name="kanban board" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_356_eceaf66ec40a04d2d6f10fcbd468151d6b6c1891.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="356" data-theme-name="peek-mode-composer" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_180_485fe5dc90fd0b88e0e17068e25c91566ce7e8de.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="180" data-theme-name="placeholder forms" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_347_b008601f5a69592b2ca680eb0c1cf25cd696d1ae.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="347" data-theme-name="reader mode" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_202_32e3bf2096229e3aa473740b0b4f16deeb87c490.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="202" data-theme-name="reply template" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_247_9815e964ee1629f467c3fb041f322939f23462db.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="247" data-theme-name="search banner (meta theme)" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_279_28553027760d3178b0316790c16f158bcef2f528.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="279" data-theme-name="sidebar theme toggle" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_343_74be0eb1e73030d3a807c1f5a40d0286094f5c7f.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="343" data-theme-name="tag banners" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_155_f1be1ae7a3d62e5a4e09feae41f0278ad2e585c0.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="155" data-theme-name="tag icons" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_208_c4f22bfb588d4595bfd7212c8e8a3f2c1324470d.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="208" data-theme-name="team pm likes" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_184_9b019c01c76cf4b4169d9101e5492a22af9e6455.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="184" data-theme-name="topic thumbnails" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_230_d23b6a1297bedf555db8350f3bd0a5e93eb1618d.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="230" data-theme-name="unformatted code detector" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_236_e4ddd6f038811b1980cfcb39fa6ce05d8c091640.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="236" data-theme-name="user card directory" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_309_d9f3a135cd92efa3fadb5a3cd2535dc21cce9b70.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="309" data-theme-name="whisper warning" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_331_6c0fe35b80b64e23e9b4234448bd0e4c63bd844c.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="331" data-theme-name="meta branded" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_320_b4691809ce49a4c525e60be0953e99263470b8fe.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="320" data-theme-name="centralhide" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_194_de7340acbcd1a6c02797beb220d614d55da12e21.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="194" data-theme-name="create-poll-first" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_379_78b9fc3953a015ddcaf24b7b028c0ea715894dc7.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="379" data-theme-name="developer guides noedit" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_358_46c2945df46014f4268b7298a739efc7cde648e6.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="358" data-theme-name="hide &#39;check doc&#39;" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_165_866360bddb0fa2142ee1ee3056fa908bfe0660e5.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="165" data-theme-name="hide sidebar for anon - hidden whispers for non-staff" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_22_e4320ed8d6c1730ed0ee52bf99ba59ef8e63f17d.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="22" data-theme-name="hide team shield" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_298_3dad5ebfc2b042f286c34609441861dd8653aaaf.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="298" data-theme-name="logo avatar exception" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_350_ee69f2887f74262af104624104df1aa29a0abb27.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="350" data-theme-name="meta branded background adjustment for jobs banner" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_314_9fdc0a244cb7e141d97509940d13eede3373f0f8.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="314" data-theme-name="rubik headings" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_267_82ee6cfc6f31cbade0df36f82eec706c40a37e6a.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="267" data-theme-name="tech advocate only group assign header button" />
+					<link href="https://meta.discourse.org/stylesheets/desktop_theme_355_2dfcab1a25c557b7544bedbdb02c6293c3075a3a.css?__ws=meta.discourse.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="355" data-theme-name="topic voting customisations" />
+					`,
+				},
+				{
+					label: "openai",
+					content: `
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/color_definitions_light_4_15_019644e6e6c0aed02eb4bed581641854b6ac7e24.css?__ws=community.openai.com" media="(prefers-color-scheme: light)" rel="stylesheet" class="light-scheme" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/color_definitions_dark-new_9_15_63c7b9dc511c92121bd146dfbaf5957d63d88e41.css?__ws=community.openai.com" media="(prefers-color-scheme: dark)" rel="stylesheet" class="dark-scheme" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/desktop_d1c281e8e371d5a41b74d37901460d8d60a5b31e.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="desktop" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/automation_d1c281e8e371d5a41b74d37901460d8d60a5b31e.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="automation" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/chat_d1c281e8e371d5a41b74d37901460d8d60a5b31e.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="chat" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/checklist_d1c281e8e371d5a41b74d37901460d8d60a5b31e.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="checklist" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-adplugin_d1c281e8e371d5a41b74d37901460d8d60a5b31e.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-adplugin" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-ai_d1c281e8e371d5a41b74d37901460d8d60a5b31e.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-ai" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-akismet_d1c281e8e371d5a41b74d37901460d8d60a5b31e.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-akismet" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-cakeday_d1c281e8e371d5a41b74d37901460d8d60a5b31e.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-cakeday" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-chat-integration_d1c281e8e371d5a41b74d37901460d8d60a5b31e.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-chat-integration" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-data-explorer_d1c281e8e371d5a41b74d37901460d8d60a5b31e.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-data-explorer" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-details_d1c281e8e371d5a41b74d37901460d8d60a5b31e.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-details" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-lazy-videos_d1c281e8e371d5a41b74d37901460d8d60a5b31e.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-lazy-videos" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-local-dates_d1c281e8e371d5a41b74d37901460d8d60a5b31e.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-local-dates" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-math_d1c281e8e371d5a41b74d37901460d8d60a5b31e.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-math" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-narrative-bot_d1c281e8e371d5a41b74d37901460d8d60a5b31e.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-narrative-bot" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-policy_d1c281e8e371d5a41b74d37901460d8d60a5b31e.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-policy" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-presence_d1c281e8e371d5a41b74d37901460d8d60a5b31e.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-presence" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-reactions_d1c281e8e371d5a41b74d37901460d8d60a5b31e.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-reactions" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-solved_d1c281e8e371d5a41b74d37901460d8d60a5b31e.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-solved" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-templates_d1c281e8e371d5a41b74d37901460d8d60a5b31e.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-templates" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-topic-voting_d1c281e8e371d5a41b74d37901460d8d60a5b31e.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-topic-voting" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-user-notes_d1c281e8e371d5a41b74d37901460d8d60a5b31e.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-user-notes" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/footnote_d1c281e8e371d5a41b74d37901460d8d60a5b31e.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="footnote" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/hosted-site_d1c281e8e371d5a41b74d37901460d8d60a5b31e.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="hosted-site" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/poll_d1c281e8e371d5a41b74d37901460d8d60a5b31e.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="poll" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/spoiler-alert_d1c281e8e371d5a41b74d37901460d8d60a5b31e.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="spoiler-alert" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/chat_desktop_d1c281e8e371d5a41b74d37901460d8d60a5b31e.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="chat_desktop" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-ai_desktop_d1c281e8e371d5a41b74d37901460d8d60a5b31e.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-ai_desktop" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-reactions_desktop_d1c281e8e371d5a41b74d37901460d8d60a5b31e.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-reactions_desktop" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/discourse-topic-voting_desktop_d1c281e8e371d5a41b74d37901460d8d60a5b31e.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="discourse-topic-voting_desktop" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/poll_desktop_d1c281e8e371d5a41b74d37901460d8d60a5b31e.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="poll_desktop" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/desktop_theme_10_eb93ffa0317a6deb25d6b8c4a8b26c5484583f57.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="10" data-theme-name="category banners" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/desktop_theme_4_d65384c90c2e1e67f425d57c10cc430175f01be8.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="4" data-theme-name="custom header links" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/desktop_theme_12_daa91c71c8e74fa5d282e6daaf15fa17993f2850.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="12" data-theme-name="discourse-mermaid-theme-component" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/desktop_theme_5_107b21bb017f44ea36395e4e1513d0b007df5b7b.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="5" data-theme-name="easy footer" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/desktop_theme_16_25287a0e5842cf28159abfee0e8826a8dda2279d.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="16" data-theme-name="sidebar theme toggle" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/desktop_theme_13_2209cf1114c3f5c41d2155f6051452062db25a85.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="13" data-theme-name="hide-footer-chat" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/desktop_theme_9_dcf65209978f476fc1dfcf461774e3c6b0ca8d85.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="9" data-theme-name="quickfixes" />
+					<link href="https://sea2.discourse-cdn.com/openai1/stylesheets/desktop_theme_15_f44ad566e45f054c5f5f2db09462c6e8df7ed5a3.css?__ws=community.openai.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="15" data-theme-name="light mode" />
+					`,
+				},
+				{
+					label: "huggingface",
+					content: `
+					<link href="https://sea2.discourse-cdn.com/hellohellohello/stylesheets/color_definitions_hf-light_3_4_faec6c9a8f489e8376cee2f300e8bb409e9d92aa.css?__ws=discuss.huggingface.co" media="(prefers-color-scheme: light)" rel="stylesheet" class="light-scheme" />
+					<link href="https://sea2.discourse-cdn.com/hellohellohello/stylesheets/color_definitions_hf-dark_4_4_87b059be82cecd26a5350181d4cd86518aa9c3ea.css?__ws=discuss.huggingface.co" media="(prefers-color-scheme: dark)" rel="stylesheet" class="dark-scheme" />
+					<link href="https://sea2.discourse-cdn.com/hellohellohello/stylesheets/desktop_6b796d0a1ddfd255a31d3207e2471022857b942a.css?__ws=discuss.huggingface.co" media="all" rel="stylesheet" data-target="desktop" />
+					<link href="https://sea2.discourse-cdn.com/hellohellohello/stylesheets/automation_6b796d0a1ddfd255a31d3207e2471022857b942a.css?__ws=discuss.huggingface.co" media="all" rel="stylesheet" data-target="automation" />
+					<link href="https://sea2.discourse-cdn.com/hellohellohello/stylesheets/checklist_6b796d0a1ddfd255a31d3207e2471022857b942a.css?__ws=discuss.huggingface.co" media="all" rel="stylesheet" data-target="checklist" />
+					<link href="https://sea2.discourse-cdn.com/hellohellohello/stylesheets/discourse-adplugin_6b796d0a1ddfd255a31d3207e2471022857b942a.css?__ws=discuss.huggingface.co" media="all" rel="stylesheet" data-target="discourse-adplugin" />
+					<link href="https://sea2.discourse-cdn.com/hellohellohello/stylesheets/discourse-ai_6b796d0a1ddfd255a31d3207e2471022857b942a.css?__ws=discuss.huggingface.co" media="all" rel="stylesheet" data-target="discourse-ai" />
+					<link href="https://sea2.discourse-cdn.com/hellohellohello/stylesheets/discourse-akismet_6b796d0a1ddfd255a31d3207e2471022857b942a.css?__ws=discuss.huggingface.co" media="all" rel="stylesheet" data-target="discourse-akismet" />
+					<link href="https://sea2.discourse-cdn.com/hellohellohello/stylesheets/discourse-cakeday_6b796d0a1ddfd255a31d3207e2471022857b942a.css?__ws=discuss.huggingface.co" media="all" rel="stylesheet" data-target="discourse-cakeday" />
+					<link href="https://sea2.discourse-cdn.com/hellohellohello/stylesheets/discourse-details_6b796d0a1ddfd255a31d3207e2471022857b942a.css?__ws=discuss.huggingface.co" media="all" rel="stylesheet" data-target="discourse-details" />
+					<link href="https://sea2.discourse-cdn.com/hellohellohello/stylesheets/discourse-lazy-videos_6b796d0a1ddfd255a31d3207e2471022857b942a.css?__ws=discuss.huggingface.co" media="all" rel="stylesheet" data-target="discourse-lazy-videos" />
+					<link href="https://sea2.discourse-cdn.com/hellohellohello/stylesheets/discourse-local-dates_6b796d0a1ddfd255a31d3207e2471022857b942a.css?__ws=discuss.huggingface.co" media="all" rel="stylesheet" data-target="discourse-local-dates" />
+					<link href="https://sea2.discourse-cdn.com/hellohellohello/stylesheets/discourse-math_6b796d0a1ddfd255a31d3207e2471022857b942a.css?__ws=discuss.huggingface.co" media="all" rel="stylesheet" data-target="discourse-math" />
+					<link href="https://sea2.discourse-cdn.com/hellohellohello/stylesheets/discourse-narrative-bot_6b796d0a1ddfd255a31d3207e2471022857b942a.css?__ws=discuss.huggingface.co" media="all" rel="stylesheet" data-target="discourse-narrative-bot" />
+					<link href="https://sea2.discourse-cdn.com/hellohellohello/stylesheets/discourse-policy_6b796d0a1ddfd255a31d3207e2471022857b942a.css?__ws=discuss.huggingface.co" media="all" rel="stylesheet" data-target="discourse-policy" />
+					<link href="https://sea2.discourse-cdn.com/hellohellohello/stylesheets/discourse-presence_6b796d0a1ddfd255a31d3207e2471022857b942a.css?__ws=discuss.huggingface.co" media="all" rel="stylesheet" data-target="discourse-presence" />
+					<link href="https://sea2.discourse-cdn.com/hellohellohello/stylesheets/discourse-reactions_6b796d0a1ddfd255a31d3207e2471022857b942a.css?__ws=discuss.huggingface.co" media="all" rel="stylesheet" data-target="discourse-reactions" />
+					<link href="https://sea2.discourse-cdn.com/hellohellohello/stylesheets/discourse-solved_6b796d0a1ddfd255a31d3207e2471022857b942a.css?__ws=discuss.huggingface.co" media="all" rel="stylesheet" data-target="discourse-solved" />
+					<link href="https://sea2.discourse-cdn.com/hellohellohello/stylesheets/discourse-templates_6b796d0a1ddfd255a31d3207e2471022857b942a.css?__ws=discuss.huggingface.co" media="all" rel="stylesheet" data-target="discourse-templates" />
+					<link href="https://sea2.discourse-cdn.com/hellohellohello/stylesheets/discourse-topic-voting_6b796d0a1ddfd255a31d3207e2471022857b942a.css?__ws=discuss.huggingface.co" media="all" rel="stylesheet" data-target="discourse-topic-voting" />
+					<link href="https://sea2.discourse-cdn.com/hellohellohello/stylesheets/footnote_6b796d0a1ddfd255a31d3207e2471022857b942a.css?__ws=discuss.huggingface.co" media="all" rel="stylesheet" data-target="footnote" />
+					<link href="https://sea2.discourse-cdn.com/hellohellohello/stylesheets/hosted-site_6b796d0a1ddfd255a31d3207e2471022857b942a.css?__ws=discuss.huggingface.co" media="all" rel="stylesheet" data-target="hosted-site" />
+					<link href="https://sea2.discourse-cdn.com/hellohellohello/stylesheets/poll_6b796d0a1ddfd255a31d3207e2471022857b942a.css?__ws=discuss.huggingface.co" media="all" rel="stylesheet" data-target="poll" />
+					<link href="https://sea2.discourse-cdn.com/hellohellohello/stylesheets/spoiler-alert_6b796d0a1ddfd255a31d3207e2471022857b942a.css?__ws=discuss.huggingface.co" media="all" rel="stylesheet" data-target="spoiler-alert" />
+					<link href="https://sea2.discourse-cdn.com/hellohellohello/stylesheets/discourse-ai_desktop_6b796d0a1ddfd255a31d3207e2471022857b942a.css?__ws=discuss.huggingface.co" media="all" rel="stylesheet" data-target="discourse-ai_desktop" />
+					<link href="https://sea2.discourse-cdn.com/hellohellohello/stylesheets/discourse-reactions_desktop_6b796d0a1ddfd255a31d3207e2471022857b942a.css?__ws=discuss.huggingface.co" media="all" rel="stylesheet" data-target="discourse-reactions_desktop" />
+					<link href="https://sea2.discourse-cdn.com/hellohellohello/stylesheets/discourse-topic-voting_desktop_6b796d0a1ddfd255a31d3207e2471022857b942a.css?__ws=discuss.huggingface.co" media="all" rel="stylesheet" data-target="discourse-topic-voting_desktop" />
+					<link href="https://sea2.discourse-cdn.com/hellohellohello/stylesheets/poll_desktop_6b796d0a1ddfd255a31d3207e2471022857b942a.css?__ws=discuss.huggingface.co" media="all" rel="stylesheet" data-target="poll_desktop" />
+					<link href="https://sea2.discourse-cdn.com/hellohellohello/stylesheets/desktop_theme_4_798b833d26be9f742a0182ec4b373eff3a774550.css?__ws=discuss.huggingface.co" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="4" data-theme-name="discourse-huggingface-theme" />
+					`,
+				},
+				{
+					label: "googleaidevs",
+					content: `
+					<link href="https://unpkg.com/material-symbols@0.29.0/index.css" media="all" rel="stylesheet" />
+					<link href="https://d1dlmcr85iqnpo.cloudfront.net/stylesheets/color_definitions_google-ai-for-developers_15_13_af0247c114bff7318144382cdca022cd9c59d3bc.css?__ws=discuss.ai.google.dev" media="all" rel="stylesheet" class="light-scheme" />
+					<link href="https://d1dlmcr85iqnpo.cloudfront.net/stylesheets/desktop_4049e6c0cb1d693ba8577642822ea353ac2d93d5.css?__ws=discuss.ai.google.dev" media="all" rel="stylesheet" data-target="desktop" />
+					<link href="https://d1dlmcr85iqnpo.cloudfront.net/stylesheets/automation_4049e6c0cb1d693ba8577642822ea353ac2d93d5.css?__ws=discuss.ai.google.dev" media="all" rel="stylesheet" data-target="automation" />
+					<link href="https://d1dlmcr85iqnpo.cloudfront.net/stylesheets/checklist_4049e6c0cb1d693ba8577642822ea353ac2d93d5.css?__ws=discuss.ai.google.dev" media="all" rel="stylesheet" data-target="checklist" />
+					<link href="https://d1dlmcr85iqnpo.cloudfront.net/stylesheets/discourse-ai_4049e6c0cb1d693ba8577642822ea353ac2d93d5.css?__ws=discuss.ai.google.dev" media="all" rel="stylesheet" data-target="discourse-ai" />
+					<link href="https://d1dlmcr85iqnpo.cloudfront.net/stylesheets/discourse-cakeday_4049e6c0cb1d693ba8577642822ea353ac2d93d5.css?__ws=discuss.ai.google.dev" media="all" rel="stylesheet" data-target="discourse-cakeday" />
+					<link href="https://d1dlmcr85iqnpo.cloudfront.net/stylesheets/discourse-data-explorer_4049e6c0cb1d693ba8577642822ea353ac2d93d5.css?__ws=discuss.ai.google.dev" media="all" rel="stylesheet" data-target="discourse-data-explorer" />
+					<link href="https://d1dlmcr85iqnpo.cloudfront.net/stylesheets/discourse-details_4049e6c0cb1d693ba8577642822ea353ac2d93d5.css?__ws=discuss.ai.google.dev" media="all" rel="stylesheet" data-target="discourse-details" />
+					<link href="https://d1dlmcr85iqnpo.cloudfront.net/stylesheets/discourse-lazy-videos_4049e6c0cb1d693ba8577642822ea353ac2d93d5.css?__ws=discuss.ai.google.dev" media="all" rel="stylesheet" data-target="discourse-lazy-videos" />
+					<link href="https://d1dlmcr85iqnpo.cloudfront.net/stylesheets/discourse-local-dates_4049e6c0cb1d693ba8577642822ea353ac2d93d5.css?__ws=discuss.ai.google.dev" media="all" rel="stylesheet" data-target="discourse-local-dates" />
+					<link href="https://d1dlmcr85iqnpo.cloudfront.net/stylesheets/discourse-narrative-bot_4049e6c0cb1d693ba8577642822ea353ac2d93d5.css?__ws=discuss.ai.google.dev" media="all" rel="stylesheet" data-target="discourse-narrative-bot" />
+					<link href="https://d1dlmcr85iqnpo.cloudfront.net/stylesheets/discourse-policy_4049e6c0cb1d693ba8577642822ea353ac2d93d5.css?__ws=discuss.ai.google.dev" media="all" rel="stylesheet" data-target="discourse-policy" />
+					<link href="https://d1dlmcr85iqnpo.cloudfront.net/stylesheets/discourse-presence_4049e6c0cb1d693ba8577642822ea353ac2d93d5.css?__ws=discuss.ai.google.dev" media="all" rel="stylesheet" data-target="discourse-presence" />
+					<link href="https://d1dlmcr85iqnpo.cloudfront.net/stylesheets/discourse-reactions_4049e6c0cb1d693ba8577642822ea353ac2d93d5.css?__ws=discuss.ai.google.dev" media="all" rel="stylesheet" data-target="discourse-reactions" />
+					<link href="https://d1dlmcr85iqnpo.cloudfront.net/stylesheets/discourse-solved_4049e6c0cb1d693ba8577642822ea353ac2d93d5.css?__ws=discuss.ai.google.dev" media="all" rel="stylesheet" data-target="discourse-solved" />
+					<link href="https://d1dlmcr85iqnpo.cloudfront.net/stylesheets/discourse-templates_4049e6c0cb1d693ba8577642822ea353ac2d93d5.css?__ws=discuss.ai.google.dev" media="all" rel="stylesheet" data-target="discourse-templates" />
+					<link href="https://d1dlmcr85iqnpo.cloudfront.net/stylesheets/discourse-topic-voting_4049e6c0cb1d693ba8577642822ea353ac2d93d5.css?__ws=discuss.ai.google.dev" media="all" rel="stylesheet" data-target="discourse-topic-voting" />
+					<link href="https://d1dlmcr85iqnpo.cloudfront.net/stylesheets/footnote_4049e6c0cb1d693ba8577642822ea353ac2d93d5.css?__ws=discuss.ai.google.dev" media="all" rel="stylesheet" data-target="footnote" />
+					<link href="https://d1dlmcr85iqnpo.cloudfront.net/stylesheets/hosted-site_4049e6c0cb1d693ba8577642822ea353ac2d93d5.css?__ws=discuss.ai.google.dev" media="all" rel="stylesheet" data-target="hosted-site" />
+					<link href="https://d1dlmcr85iqnpo.cloudfront.net/stylesheets/poll_4049e6c0cb1d693ba8577642822ea353ac2d93d5.css?__ws=discuss.ai.google.dev" media="all" rel="stylesheet" data-target="poll" />
+					<link href="https://d1dlmcr85iqnpo.cloudfront.net/stylesheets/spoiler-alert_4049e6c0cb1d693ba8577642822ea353ac2d93d5.css?__ws=discuss.ai.google.dev" media="all" rel="stylesheet" data-target="spoiler-alert" />
+					<link href="https://d1dlmcr85iqnpo.cloudfront.net/stylesheets/discourse-ai_desktop_4049e6c0cb1d693ba8577642822ea353ac2d93d5.css?__ws=discuss.ai.google.dev" media="all" rel="stylesheet" data-target="discourse-ai_desktop" />
+					<link href="https://d1dlmcr85iqnpo.cloudfront.net/stylesheets/discourse-reactions_desktop_4049e6c0cb1d693ba8577642822ea353ac2d93d5.css?__ws=discuss.ai.google.dev" media="all" rel="stylesheet" data-target="discourse-reactions_desktop" />
+					<link href="https://d1dlmcr85iqnpo.cloudfront.net/stylesheets/discourse-topic-voting_desktop_4049e6c0cb1d693ba8577642822ea353ac2d93d5.css?__ws=discuss.ai.google.dev" media="all" rel="stylesheet" data-target="discourse-topic-voting_desktop" />
+					<link href="https://d1dlmcr85iqnpo.cloudfront.net/stylesheets/poll_desktop_4049e6c0cb1d693ba8577642822ea353ac2d93d5.css?__ws=discuss.ai.google.dev" media="all" rel="stylesheet" data-target="poll_desktop" />
+					<link href="https://d1dlmcr85iqnpo.cloudfront.net/stylesheets/desktop_theme_4_ba9964201f529de7d519443b7509431b7b4ff4fd.css?__ws=discuss.ai.google.dev" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="4" data-theme-name="discourse header search" />
+					<link href="https://d1dlmcr85iqnpo.cloudfront.net/stylesheets/desktop_theme_3_1faab6848c9a550804b3d45949afe470cbb80fca.css?__ws=discuss.ai.google.dev" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="3" data-theme-name="discourse-material-icons" />
+					<link href="https://d1dlmcr85iqnpo.cloudfront.net/stylesheets/desktop_theme_13_d08a7c63a1608156c17db3ff2af47643370dae60.css?__ws=discuss.ai.google.dev" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="13" data-theme-name="google ai" />
+					<link href="https://d1dlmcr85iqnpo.cloudfront.net/stylesheets/desktop_theme_9_bb6f26a10ba4889745f52354a4aa9fe8f05e59d9.css?__ws=discuss.ai.google.dev" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="9" data-theme-name="global notice custom css" />
+					<link href="https://d1dlmcr85iqnpo.cloudfront.net/stylesheets/desktop_theme_8_ae8fb5da3d87de98751bddc380ec689fb70dbfbf.css?__ws=discuss.ai.google.dev" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="8" data-theme-name="temp nav fixes" />
+					`,
+				},
+				{
+					label: "googleaidevs_old",
+					content: `
+					<link href="https://unpkg.com/material-symbols@0.29.0/index.css" media="all" rel="stylesheet" />
+					<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/color_definitions_google-ai-for-developers_8_2_a146065001d103c6f508d0aecd9795e2b85e0231.css" media="all" rel="stylesheet" class="light-scheme">
+					<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/desktop_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="desktop">
+					<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/checklist_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="checklist">
+					<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/discourse-ai_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="discourse-ai">
+					<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/discourse-akismet_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="discourse-akismet">
+					<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/discourse-cakeday_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="discourse-cakeday">
+					<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/discourse-data-explorer_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="discourse-data-explorer">
+					<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/discourse-details_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="discourse-details">
+					<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/discourse-lazy-videos_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="discourse-lazy-videos">
+					<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/discourse-local-dates_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="discourse-local-dates">
+					<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/discourse-narrative-bot_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="discourse-narrative-bot">
+					<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/discourse-policy_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="discourse-policy">
+					<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/discourse-presence_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="discourse-presence">
+					<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/discourse-reactions_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="discourse-reactions">
+					<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/discourse-solved_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="discourse-solved">
+					<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/discourse-templates_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="discourse-templates">
+					<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/discourse-topic-voting_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="discourse-topic-voting">
+					<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/footnote_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="footnote">
+					<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/hosted-site_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="hosted-site">
+					<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/poll_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="poll">
+					<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/spoiler-alert_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="spoiler-alert">
+					<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/discourse-ai_desktop_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="discourse-ai_desktop">
+					<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/discourse-reactions_desktop_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="discourse-reactions_desktop">
+					<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/discourse-topic-voting_desktop_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="discourse-topic-voting_desktop">
+					<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/poll_desktop_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="poll_desktop">
+					<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/desktop_theme_4_89b44c1aa4a914829f5dab76be36f050017112fd.css" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="4" data-theme-name="discourse header search">
+					<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/desktop_theme_3_a8a980bc06c18d3fc858c318921f96f6581459cf.css" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="3" data-theme-name="discourse-material-icons">
+					<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/desktop_theme_9_ad782db09c6a21e86f43e7f9fbbaa30324037bf5.css" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="9" data-theme-name="global notice custom css">
+					<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/desktop_theme_8_878e84961d78833adf9238d6eda91eb9292d7ed3.css" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="8" data-theme-name="temp nav fixes">
+					<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/desktop_theme_2_c35f48dbd27cfaac6e78670aa85b8a0bd9a462fa.css" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="2" data-theme-name="google ai">
+					`,
+				},
+				{
+					label: "unity",
+					content: `
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/color_definitions_unity-light-scheme_9_10_4c0f3200fa1f4e23d3c58e1203db22882c615fd1.css?__ws=discussions.unity.com" media="(prefers-color-scheme: light)" rel="stylesheet" class="light-scheme" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/color_definitions_unity-dark-scheme_10_10_dea49c15513e3a5976eb6195cd5867019a8d1217.css?__ws=discussions.unity.com" media="(prefers-color-scheme: dark)" rel="stylesheet" class="dark-scheme" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/desktop_3ab875e5dc247156f1e0f74b40c2324bed596e4e.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="desktop" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/automation_3ab875e5dc247156f1e0f74b40c2324bed596e4e.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="automation" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/checklist_3ab875e5dc247156f1e0f74b40c2324bed596e4e.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="checklist" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/discourse-ai_3ab875e5dc247156f1e0f74b40c2324bed596e4e.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="discourse-ai" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/discourse-akismet_3ab875e5dc247156f1e0f74b40c2324bed596e4e.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="discourse-akismet" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/discourse-cakeday_3ab875e5dc247156f1e0f74b40c2324bed596e4e.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="discourse-cakeday" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/discourse-chat-integration_3ab875e5dc247156f1e0f74b40c2324bed596e4e.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="discourse-chat-integration" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/discourse-custom-topic-lists_3ab875e5dc247156f1e0f74b40c2324bed596e4e.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="discourse-custom-topic-lists" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/discourse-data-explorer_3ab875e5dc247156f1e0f74b40c2324bed596e4e.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="discourse-data-explorer" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/discourse-details_3ab875e5dc247156f1e0f74b40c2324bed596e4e.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="discourse-details" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/discourse-lazy-videos_3ab875e5dc247156f1e0f74b40c2324bed596e4e.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="discourse-lazy-videos" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/discourse-local-dates_3ab875e5dc247156f1e0f74b40c2324bed596e4e.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="discourse-local-dates" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/discourse-math_3ab875e5dc247156f1e0f74b40c2324bed596e4e.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="discourse-math" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/discourse-narrative-bot_3ab875e5dc247156f1e0f74b40c2324bed596e4e.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="discourse-narrative-bot" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/discourse-policy_3ab875e5dc247156f1e0f74b40c2324bed596e4e.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="discourse-policy" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/discourse-post-voting_3ab875e5dc247156f1e0f74b40c2324bed596e4e.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="discourse-post-voting" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/discourse-presence_3ab875e5dc247156f1e0f74b40c2324bed596e4e.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="discourse-presence" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/discourse-preset-topic-composer_3ab875e5dc247156f1e0f74b40c2324bed596e4e.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="discourse-preset-topic-composer" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/discourse-reactions_3ab875e5dc247156f1e0f74b40c2324bed596e4e.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="discourse-reactions" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/discourse-rss-polling_3ab875e5dc247156f1e0f74b40c2324bed596e4e.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="discourse-rss-polling" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/discourse-saved-searches_3ab875e5dc247156f1e0f74b40c2324bed596e4e.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="discourse-saved-searches" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/discourse-signatures_3ab875e5dc247156f1e0f74b40c2324bed596e4e.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="discourse-signatures" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/discourse-solved_3ab875e5dc247156f1e0f74b40c2324bed596e4e.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="discourse-solved" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/discourse-templates_3ab875e5dc247156f1e0f74b40c2324bed596e4e.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="discourse-templates" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/discourse-user-notes_3ab875e5dc247156f1e0f74b40c2324bed596e4e.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="discourse-user-notes" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/footnote_3ab875e5dc247156f1e0f74b40c2324bed596e4e.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="footnote" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/hosted-site_3ab875e5dc247156f1e0f74b40c2324bed596e4e.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="hosted-site" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/poll_3ab875e5dc247156f1e0f74b40c2324bed596e4e.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="poll" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/spoiler-alert_3ab875e5dc247156f1e0f74b40c2324bed596e4e.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="spoiler-alert" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/discourse-ai_desktop_3ab875e5dc247156f1e0f74b40c2324bed596e4e.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="discourse-ai_desktop" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/discourse-post-voting_desktop_3ab875e5dc247156f1e0f74b40c2324bed596e4e.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="discourse-post-voting_desktop" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/discourse-reactions_desktop_3ab875e5dc247156f1e0f74b40c2324bed596e4e.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="discourse-reactions_desktop" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/poll_desktop_3ab875e5dc247156f1e0f74b40c2324bed596e4e.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="poll_desktop" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/desktop_theme_21_0aef52e1507c364e5b4a38efb4a7747af80e34dd.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="21" data-theme-name="category badge styles" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/desktop_theme_43_0f0abc330f1fee80a02faf9533ccdd57e5156295.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="43" data-theme-name="category banners" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/desktop_theme_44_90afd1b2afeca839e043931ca2a92670ea58f218.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="44" data-theme-name="category icons" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/desktop_theme_41_a46ab19dec44eb8897209583d4c1e2bebcd6b056.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="41" data-theme-name="collapsible category groups" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/desktop_theme_14_2ec989b5934f559b3974924748c82cc99e13459d.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="14" data-theme-name="discotoc" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/desktop_theme_52_7ab83170c49d024e5f45ab4d9f32a6797f9a1c43.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="52" data-theme-name="discourse notification banners" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/desktop_theme_22_335813956672e0f7931b14b12f2fa8c3bf383b66.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="22" data-theme-name="discourse-icon" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/desktop_theme_13_89cdd8c07e39ed9716f1dd22149e6aa08ddac333.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="13" data-theme-name="discourse-mermaid-theme-component" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/desktop_theme_6_9b7241fef6f7cca010f7100ffa8a0179d281de4b.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="6" data-theme-name="discourse-search-banner" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/desktop_theme_45_5f84957c1e58bee4b7c29adfa38d72d42be9e267.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="45" data-theme-name="experimental filter component" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/desktop_theme_46_2accdf8b1149da4fd4c0c01dde041bb8e63a96a0.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="46" data-theme-name="full width" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/desktop_theme_15_de98df9103a7bd172f942e1cf65f28e29bcb6e9f.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="15" data-theme-name="image comparison slider" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/desktop_theme_16_a55090aab48d77a5437b1861ae31b83cfbe8628b.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="16" data-theme-name="pdf previews" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/desktop_theme_48_a909e3f322a256a37bf1a96e776c12e99f60438f.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="48" data-theme-name="tag icons" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/desktop_theme_17_f27465128027862bf953a6316a66b42027e927fa.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="17" data-theme-name="tiles - gallery component" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/desktop_theme_18_e7d3d2e2f1df834a881c7977fec21033b296fc2c.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="18" data-theme-name="topic thumbnails" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/desktop_theme_28_f70f13a252aaee09db54bda2c52aaa15365c3d4b.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="28" data-theme-name="unformatted code detector" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/desktop_theme_49_117aba71705755363a5bdc140dca2fefd063d22e.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="49" data-theme-name="unity: brand identity" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/desktop_theme_25_6e4037e555d042dff90f58f2a836e23c0fc60809.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="25" data-theme-name="unity: dsa" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/desktop_theme_12_ed791f42412af1df54faf7fcca1d9dea79f6368c.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="12" data-theme-name="unity: onetrust" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/desktop_theme_50_94cf41545197b840d16179dc159164ab329b4260.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="50" data-theme-name="unity: theme extras" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/desktop_theme_10_f577ac1095ee1cff6038cf8e30a6fd2e42f7bcbd.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="10" data-theme-name="unity" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/desktop_theme_53_f6439cf6886fbca963a4a481eca73913ad57b323.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="53" data-theme-name="hotfix: composer overflow" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/desktop_theme_58_8699dbf8b17f3ffa44dc48337fa22bb3e6d72174.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="58" data-theme-name="hotfix: font-size for inline and block code - csd-327" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/desktop_theme_55_4a4952ef33b65a1513d1a4674c0118a08c992ec9.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="55" data-theme-name="hotfix: hide suspension message on cards" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/desktop_theme_51_1a82c7616e836c87cfb5e913d3324939426a2b64.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="51" data-theme-name="hotfix: restyle experimental topic summary" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/desktop_theme_54_8f5fb1a637bc8278d4b12a02aad6b9f2faf3890c.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="54" data-theme-name="hotfix: signatures brake the solved post layout" />
+					<link href="https://dub2.discourse-cdn.com/unity/stylesheets/desktop_theme_24_076484b88f0a00ab205271c05953d327236f3fd6.css?__ws=discussions.unity.com" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="24" data-theme-name="override-mermaid-styles" />
+					`,
+				},
+				{
+					label: "godot",
+					content: `
+					<link href="https://forum.godotengine.org/stylesheets/color_definitions_godot-light_14_5_90f4bf1af7154e6333eb342844c4f0494ccfc932.css?__ws=forum.godotengine.org" media="all" rel="stylesheet" class="light-scheme" />
+					<link href="https://forum.godotengine.org/stylesheets/color_definitions_godot-dark_15_5_ac206a2ac9e642eeba474f3205c48584eabffe88.css?__ws=forum.godotengine.org" media="(prefers-color-scheme: dark)" rel="stylesheet" class="dark-scheme" />
+					<link href="https://forum.godotengine.org/stylesheets/desktop_1c75e68965ba63c0b63abb10fb2514d72277bff2.css?__ws=forum.godotengine.org" media="all" rel="stylesheet" data-target="desktop" />
+					<link href="https://forum.godotengine.org/stylesheets/checklist_1c75e68965ba63c0b63abb10fb2514d72277bff2.css?__ws=forum.godotengine.org" media="all" rel="stylesheet" data-target="checklist" />
+					<link href="https://forum.godotengine.org/stylesheets/discourse-details_1c75e68965ba63c0b63abb10fb2514d72277bff2.css?__ws=forum.godotengine.org" media="all" rel="stylesheet" data-target="discourse-details" />
+					<link href="https://forum.godotengine.org/stylesheets/discourse-lazy-videos_1c75e68965ba63c0b63abb10fb2514d72277bff2.css?__ws=forum.godotengine.org" media="all" rel="stylesheet" data-target="discourse-lazy-videos" />
+					<link href="https://forum.godotengine.org/stylesheets/discourse-local-dates_1c75e68965ba63c0b63abb10fb2514d72277bff2.css?__ws=forum.godotengine.org" media="all" rel="stylesheet" data-target="discourse-local-dates" />
+					<link href="https://forum.godotengine.org/stylesheets/discourse-narrative-bot_1c75e68965ba63c0b63abb10fb2514d72277bff2.css?__ws=forum.godotengine.org" media="all" rel="stylesheet" data-target="discourse-narrative-bot" />
+					<link href="https://forum.godotengine.org/stylesheets/discourse-presence_1c75e68965ba63c0b63abb10fb2514d72277bff2.css?__ws=forum.godotengine.org" media="all" rel="stylesheet" data-target="discourse-presence" />
+					<link href="https://forum.godotengine.org/stylesheets/discourse-solved_1c75e68965ba63c0b63abb10fb2514d72277bff2.css?__ws=forum.godotengine.org" media="all" rel="stylesheet" data-target="discourse-solved" />
+					<link href="https://forum.godotengine.org/stylesheets/docker_manager_1c75e68965ba63c0b63abb10fb2514d72277bff2.css?__ws=forum.godotengine.org" media="all" rel="stylesheet" data-target="docker_manager" />
+					<link href="https://forum.godotengine.org/stylesheets/footnote_1c75e68965ba63c0b63abb10fb2514d72277bff2.css?__ws=forum.godotengine.org" media="all" rel="stylesheet" data-target="footnote" />
+					<link href="https://forum.godotengine.org/stylesheets/poll_1c75e68965ba63c0b63abb10fb2514d72277bff2.css?__ws=forum.godotengine.org" media="all" rel="stylesheet" data-target="poll" />
+					<link href="https://forum.godotengine.org/stylesheets/spoiler-alert_1c75e68965ba63c0b63abb10fb2514d72277bff2.css?__ws=forum.godotengine.org" media="all" rel="stylesheet" data-target="spoiler-alert" />
+					<link href="https://forum.godotengine.org/stylesheets/poll_desktop_1c75e68965ba63c0b63abb10fb2514d72277bff2.css?__ws=forum.godotengine.org" media="all" rel="stylesheet" data-target="poll_desktop" />
+					<link href="https://forum.godotengine.org/stylesheets/desktop_theme_9_a23c0d9257e24e19da9539f850fda68cba1f97ee.css?__ws=forum.godotengine.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="9" data-theme-name="custom header links" />
+					<link href="https://forum.godotengine.org/stylesheets/desktop_theme_3_e9aa769da3cbc75c620e27a4d71cba95b61df745.css?__ws=forum.godotengine.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="3" data-theme-name="godot tweaks" />
+					<link href="https://forum.godotengine.org/stylesheets/desktop_theme_12_8497322318172ccaeb4d4528be13bdf32378d137.css?__ws=forum.godotengine.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="12" data-theme-name="post badges" />
+					<link href="https://forum.godotengine.org/stylesheets/desktop_theme_7_3dddee68983edaf20a23ea3e31dec3c0c66a24a7.css?__ws=forum.godotengine.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="7" data-theme-name="search banner" />
+					<link href="https://forum.godotengine.org/stylesheets/desktop_theme_5_13ebfcfad98a540810a59b24fd9d79a75fb70374.css?__ws=forum.godotengine.org" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="5" data-theme-name="godot theme" />
+					`,
+				},
+				{
+					label: "ksec",
+					content: `
+					<link href="https://forum.ksec.co.uk/stylesheets/color_definitions_light_7_2_5186d2d3066aedb3bfcac1027d47b8b0b5350afb.css" media="all" rel="stylesheet" class="light-scheme">
+					<link href="https://forum.ksec.co.uk/stylesheets/color_definitions_dark_1_2_a0603164c6b779ba925871d7963187c6a6dfa8d0.css" media="(prefers-color-scheme:dark)" rel="stylesheet" class="dark-scheme">
+					<link href="https://forum.ksec.co.uk/stylesheets/desktop_1f2801adf122e33ac71771f0a0d92bf223707572.css" media="all" rel="stylesheet" data-target="desktop">
+					<link href="https://forum.ksec.co.uk/stylesheets/checklist_1f2801adf122e33ac71771f0a0d92bf223707572.css" media="all" rel="stylesheet" data-target="checklist">
+					<link href="https://forum.ksec.co.uk/stylesheets/discourse-ai_1f2801adf122e33ac71771f0a0d92bf223707572.css" media="all" rel="stylesheet" data-target="discourse-ai">
+					<link href="https://forum.ksec.co.uk/stylesheets/discourse-akismet_1f2801adf122e33ac71771f0a0d92bf223707572.css" media="all" rel="stylesheet" data-target="discourse-akismet">
+					<link href="https://forum.ksec.co.uk/stylesheets/discourse-cakeday_1f2801adf122e33ac71771f0a0d92bf223707572.css" media="all" rel="stylesheet" data-target="discourse-cakeday">
+					<link href="https://forum.ksec.co.uk/stylesheets/discourse-details_1f2801adf122e33ac71771f0a0d92bf223707572.css" media="all" rel="stylesheet" data-target="discourse-details">
+					<link href="https://forum.ksec.co.uk/stylesheets/discourse-gamification_1f2801adf122e33ac71771f0a0d92bf223707572.css" media="all" rel="stylesheet" data-target="discourse-gamification">
+					<link href="https://forum.ksec.co.uk/stylesheets/discourse-lazy-videos_1f2801adf122e33ac71771f0a0d92bf223707572.css" media="all" rel="stylesheet" data-target="discourse-lazy-videos">
+					<link href="https://forum.ksec.co.uk/stylesheets/discourse-local-dates_1f2801adf122e33ac71771f0a0d92bf223707572.css" media="all" rel="stylesheet" data-target="discourse-local-dates">
+					<link href="https://forum.ksec.co.uk/stylesheets/discourse-narrative-bot_1f2801adf122e33ac71771f0a0d92bf223707572.css" media="all" rel="stylesheet" data-target="discourse-narrative-bot">
+					<link href="https://forum.ksec.co.uk/stylesheets/discourse-presence_1f2801adf122e33ac71771f0a0d92bf223707572.css" media="all" rel="stylesheet" data-target="discourse-presence">
+					<link href="https://forum.ksec.co.uk/stylesheets/discourse-reactions_1f2801adf122e33ac71771f0a0d92bf223707572.css" media="all" rel="stylesheet" data-target="discourse-reactions">
+					<link href="https://forum.ksec.co.uk/stylesheets/discourse-rss-polling_1f2801adf122e33ac71771f0a0d92bf223707572.css" media="all" rel="stylesheet" data-target="discourse-rss-polling">
+					<link href="https://forum.ksec.co.uk/stylesheets/docker_manager_1f2801adf122e33ac71771f0a0d92bf223707572.css" media="all" rel="stylesheet" data-target="docker_manager">
+					<link href="https://forum.ksec.co.uk/stylesheets/footnote_1f2801adf122e33ac71771f0a0d92bf223707572.css" media="all" rel="stylesheet" data-target="footnote">
+					<link href="https://forum.ksec.co.uk/stylesheets/poll_1f2801adf122e33ac71771f0a0d92bf223707572.css" media="all" rel="stylesheet" data-target="poll">
+					<link href="https://forum.ksec.co.uk/stylesheets/spoiler-alert_1f2801adf122e33ac71771f0a0d92bf223707572.css" media="all" rel="stylesheet" data-target="spoiler-alert">
+					<link href="https://forum.ksec.co.uk/stylesheets/discourse-ai_desktop_1f2801adf122e33ac71771f0a0d92bf223707572.css" media="all" rel="stylesheet" data-target="discourse-ai_desktop">
+					<link href="https://forum.ksec.co.uk/stylesheets/discourse-gamification_desktop_1f2801adf122e33ac71771f0a0d92bf223707572.css" media="all" rel="stylesheet" data-target="discourse-gamification_desktop">
+					<link href="https://forum.ksec.co.uk/stylesheets/discourse-reactions_desktop_1f2801adf122e33ac71771f0a0d92bf223707572.css" media="all" rel="stylesheet" data-target="discourse-reactions_desktop">
+					<link href="https://forum.ksec.co.uk/stylesheets/poll_desktop_1f2801adf122e33ac71771f0a0d92bf223707572.css" media="all" rel="stylesheet" data-target="poll_desktop">
+					<link href="https://forum.ksec.co.uk/stylesheets/desktop_theme_4_51fe4f92f85e2ddf8cb2ac39b3f18429f14452c8.css" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="4" data-theme-name="discourse clickable topic">
+					<link href="https://forum.ksec.co.uk/stylesheets/desktop_theme_6_003073d7e039da7d37eb1e79b3772306ac8657f4.css" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="6" data-theme-name="discourse-gifs">
+					<link href="https://forum.ksec.co.uk/stylesheets/desktop_theme_5_ce3252be82b7db613c78ea4f283dcf17abe51741.css" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="5" data-theme-name="discourse-search-banner">
+					<link href="https://forum.ksec.co.uk/stylesheets/desktop_theme_9_12b3533905718e859faa16d62a11c119e4d64875.css" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="9" data-theme-name="icon header links">
+					<link href="https://forum.ksec.co.uk/stylesheets/desktop_theme_3_28ffee2ef9ff10c2ad27c49227f68bb1da72a779.css" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="3" data-theme-name="modern category + group boxes">
+					<link href="https://forum.ksec.co.uk/stylesheets/desktop_theme_2_dd1b36aa59bc2c658ff7a7825007d31f580dab8b.css" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="2" data-theme-name="air theme">
+					<link href="https://forum.ksec.co.uk/stylesheets/desktop_theme_11_f4cc23465e9e5bf8d991504b6106825edc03c16a.css" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="11" data-theme-name="custom css &amp; html">
+					`,
+				},
+			]
+			let hasStyle = themeStyles.some(themeStyle => themeStyle.label === style);
+			if (hasStyle) {
+				let themeStyle = themeStyles.find(themeStyle => themeStyle.label === style);
+				let styles = $(`<discourse-assets-stylesheets>${themeStyle.content}</discourse-assets-stylesheets>`)
+				waitForKeyElements("discourse-assets", (element) => {
+					if (element.find("discourse-assets-stylesheets[themeStyles]").length > 0) return;
+					styles.attr("themeStyles", themeStyle.label)
+					element.append(styles);
+				}, true)
 			}
 		},
 		bigCloseButton() {
@@ -515,6 +903,10 @@
 	if (emojiSetting !== "false") {
 		base.replaceEmoji(emojiSetting);
 	}
+	let themeSetting = GM_getValue("replaceTheme");
+	if (themeSetting !== "false") {
+		base.replaceTheme(themeSetting);
+	}
 	if (GM_getValue("panguText") === "true") {
 		base.panguText();
 	}
@@ -547,6 +939,7 @@
 		if ($("#discourseHelper").length > 0) return;
 		let menu = $(`<div id="discourseHelper"></div>`)
 		element.append(menu);
+		menu.append(`<style id="katexStyle">${GM_getResourceText("katexStyle")}</style>`)
 		menu.append(`<style id="discourseHelper-Style">
 			html:has(#dialog-holder .dialog-content .dialog-body) {
 				overflow: hidden;
@@ -570,6 +963,10 @@
 			}
 			tr[data-topic-id]:hover .previewTopic {
 				display: inline-flex;
+			}
+
+			.CtxtMenu_MenuFrame {
+				z-index: 10000 !important;
 			}
 
 			#floating-nav{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;align-items:center;gap:15px;z-index:999}
@@ -789,6 +1186,20 @@
 									<option value="fluentui">微软（FluentUI）</option>
 									<option value="twemoji">推特（Twitter Emoji）</option>
 									<option value="openmoji">OpenMoji</option>
+								</select>
+							</label>
+							<label class="select-label">
+								<span>页面 - 主题替换<br/><small>切换论坛界面主题风格</small></span>
+								<select data-setting="replaceTheme">
+									<option value="false">关闭</option>
+									<option value="discourse">Discourse Meta (meta.discourse.org)</option>
+									<option value="openai">OpenAI 开发者社区 (community.openai.com)</option>
+									<option value="huggingface">HuggingFace 社区 (discuss.huggingface.co)</option>
+									<option value="googleaidevs">Google AI 开发者社区 (discuss.ai.google.dev)</option>
+									<option value="googleaidevs_old">Google AI 开发者社区旧版 (discuss.ai.google.dev)</option>
+									<option value="unity">Unity 社区 (discussions.unity.com)</option>
+									<option value="godot">Godot 社区 (forum.godotengine.org)</option>
+									<option value="ksec">KSEC 安全社区 (forum.ksec.co.uk)</option>
 								</select>
 							</label>
 							<label class="checkbox-label">
