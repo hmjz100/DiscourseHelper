@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Discourse 助手
 // @namespace    github.com/hmjz100
-// @version      1.0.2
+// @version      1.0.3
 // @author       Hmjz100
 // @description  重构 “linuxdo 增强插件”，再次以脚本方式为您呈现！
 // @license      MIT
@@ -505,41 +505,41 @@
 	}
 
 	base.initSettings();
-	if (GM_getValue("topicNewTab")) {
+	if (GM_getValue("topicNewTab") === "true") {
 		base.topicNewTab();
 	}
-	if (GM_getValue("bigCloseButton")) {
+	if (GM_getValue("bigCloseButton") === "true") {
 		base.bigCloseButton();
 	}
 	let emojiSetting = GM_getValue("replaceEmoji");
 	if (emojiSetting !== "false") {
 		base.replaceEmoji(emojiSetting);
 	}
-	if (GM_getValue("panguText")) {
+	if (GM_getValue("panguText") === "true") {
 		base.panguText();
 	}
-	if (GM_getValue("optimizeEditor")) {
+	if (GM_getValue("optimizeEditor") === "true") {
 		base.optimizeEditor();
 	}
-	if (GM_getValue("japaneseEditor")) {
+	if (GM_getValue("japaneseEditor") === "true") {
 		base.japaneseEditor();
 	}
-	if (GM_getValue("previewTopic")) {
+	if (GM_getValue("previewTopic") === "true") {
 		base.preViewer();
 	}
-	if (GM_getValue("floorTopic")) {
+	if (GM_getValue("floorTopic") === "true") {
 		base.floorTopic();
 	}
-	if (GM_getValue("showTopicTime")) {
+	if (GM_getValue("showTopicTime") === "true") {
 		base.showTopicTime();
 	}
-	if (GM_getValue("showNewTab")) {
+	if (GM_getValue("showNewTab") === "true") {
 		base.showNewTab();
 	}
-	if (GM_getValue("autoHeight")) {
+	if (GM_getValue("autoHeight") === "true") {
 		base.autoHeight();
 	}
-	if (GM_getValue("switchReply")) {
+	if (GM_getValue("switchReply") === "true") {
 		base.switchReply();
 	}
 
@@ -638,7 +638,7 @@
 			buttons.append(button);
 		}
 
-		if (GM_getValue("filterByOP")) {
+		if (GM_getValue("filterByOP") === "true") {
 			let styleElement = null;
 			let isEnabled = false;
 			createFloatingButton({
@@ -663,13 +663,13 @@
 			});
 		}
 
-		if (GM_getValue("autoReader") && GM_getValue("autoReaderWait") && GM_getValue("autoReaderSpeed") && GM_getValue("autoReaderSpeed") > 0) {
+		if (GM_getValue("autoReader") === "true" && GM_getValue("autoReaderWait") && GM_getValue("autoReaderSpeed") && Number(GM_getValue("autoReaderSpeed")) > 0) {
 			let isEnabled = false;
 			let timeoutId = null; // 定时器 ID
 
 			function autoScroll(button) {
 				if (isEnabled) {
-					window.scrollBy(0, GM_getValue("autoReaderSpeed"));
+					window.scrollBy(0, Number(GM_getValue("autoReaderSpeed")));
 					let scrollTop = $(window).scrollTop();
 					let scrollHeight = $(document).height();
 					let windowHeight = $(window).height();
@@ -679,7 +679,7 @@
 								isEnabled = false;
 								timeoutId = null;
 								button.find("use").attr("xlink:href", "#play");
-							}, GM_getValue("autoReaderWait"));
+							}, Number(GM_getValue("autoReaderWait")));
 						}
 					} else {
 						if (timeoutId) {
@@ -724,8 +724,10 @@
 			icon: 'reply',
 			onClick: () => $(".reply-to-post").click(),
 			onCheck: () => {
-				$(".reply-to-post").hide();
 				return $(".reply-to-post").length > 0
+			},
+			onStart: () => {
+				$(".reply-to-post").hide();
 			}
 		});
 
@@ -916,6 +918,7 @@
 				previewWindow.document.write(newDoc.documentElement.outerHTML);
 				previewWindow.document.close();
 			})
+
 			helperSettings.find(".controls input[type='checkbox']").each(function () {
 				let settingKey = $(this).data("setting");
 				let settingValue = GM_getValue(settingKey);
@@ -944,25 +947,27 @@
 			helperSettings.find(".controls input[type='checkbox']").on("change", function () {
 				let settingKey = $(this).data("setting");
 				let newValue = $(this).is(":checked");
-				GM_setValue(settingKey, newValue);
+				console.log(newValue)
+				GM_setValue(settingKey, newValue.toString());
 			});
 			helperSettings.find(".controls select").on("change", function () {
 				let settingKey = $(this).data("setting");
 				let newValue = $(this).val();
-				GM_setValue(settingKey, newValue);
+				GM_setValue(settingKey, newValue.toString());
 			});
 			helperSettings.find(".controls input[type='number']").on("change", function () {
 				let settingKey = $(this).data("setting");
 				let newValue = $(this).val();
 				if (!isNaN(newValue)) {
-					GM_setValue(settingKey, Number(newValue));
+					GM_setValue(settingKey, newValue.toString());
 				}
 			});
 			helperSettings.find(".controls input[type='text']").on("change", function () {
 				let settingKey = $(this).data("setting");
 				let newValue = $(this).val();
-				GM_setValue(settingKey, newValue);
+				GM_setValue(settingKey, newValue.toString());
 			});
+
 			timer = setInterval(() => {
 				helperSettings.find(".dialog-content .dialog-header > .date").text(formatDate(Date.now()))
 			}, 500)
