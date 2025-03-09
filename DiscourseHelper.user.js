@@ -45,7 +45,7 @@
 			};
 
 			for (let key in defaultSettings) {
-				if (typeof GM_getValue(key) !== "String" || !GM_getValue(key)) {
+				if (!GM_getValue(key)) {
 					GM_setValue(key, defaultSettings[key].toString());
 				}
 			}
