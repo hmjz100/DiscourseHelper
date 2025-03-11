@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name          Discourse 助手
 // @namespace     github.com/hmjz100
-// @version       1.0.5
+// @version       1.0.5.1
 // @author        Hmjz100
 // @description   重构 “linuxdo 增强插件”，再次以脚本方式为您呈现！
 // @license       MIT
@@ -1339,7 +1339,7 @@
 			</a>`;
 			base.waitForKeyElements("tr[data-topic-id], h1[data-topic-id]", (element) => {
 				let topicId = element.data("topic-id") || element.find('aa[href*="/t/topic/"').attr("href").match(/\/t\/topic\/(\d+)/)?.[1]
-				if (element.find(".previewTopic").length > 0 || !topicId) return;
+				if (element.find(".previewTopic").length > 0|| element.prev(".previewTopic").length > 0 || !topicId) return;
 				let status = element.find(".topic-statuses");
 				let button = $(preButton);
 				button.on("click", (event) => {
@@ -1347,7 +1347,7 @@
 					event.stopPropagation(); // 停止链接冒泡，不映射到复制后的项目自己的点击事件
 					base.previewTopic(topicId)
 				})
-				button.attr("preview", topicId)
+				button.data("preview", topicId)
 				status.prepend(button)
 			})
 			base.waitForKeyElements(`
@@ -1375,9 +1375,24 @@
 					});
 
 					button.attr("preview", topicId)
-					if (elemStatus.length > 0) elemStatus.prepend(button);
-					else if (element.parent().prop('tagName') === "LI") element.append(button);
-					else element.before(button);
+					if (elemStatus.length > 0) {
+						elemStatus.prepend(button);
+					} else if (element.parent().prop('tagName') === "LI") {
+						element.append(button);
+					} else {
+						element.before(button);
+
+						// 监听原始元素是否还存在，不在就一起删掉
+						let observer = new MutationObserver((mutationsList) => {
+							mutationsList.forEach((mutation) => {
+								if (!document.contains(element[0])) {
+									button.remove();
+									observer.disconnect();
+								}
+							});
+						});
+						observer.observe(document.body, { childList: true, subtree: true });
+					}
 				})
 		},
 		topicFloorIndicator() {
