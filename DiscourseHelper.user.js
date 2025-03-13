@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name          Discourse 助手
 // @namespace     github.com/hmjz100
-// @version       1.0.6.1
+// @version       1.0.6.2
 // @author        Hmjz100
 // @description   重构 “linuxdo 增强插件”，再次以脚本方式为您呈现！
 // @license       AGPL-3.0-or-later
@@ -35,6 +35,9 @@
 	let base = {
 		initDefaultConfig() {
 			let defaultSettings = {
+				hideTopicReplied: "false",
+				hideTopicViewed: "false",
+				hideActivityColumn: "false",
 				showTopicCreatedTime: "true",
 				topicNewTab: "false",
 				previewTopic: "true",
@@ -42,6 +45,7 @@
 				autoHeight: "false",
 				expandReply: "false",
 				foldUselessReply: "true",
+				foldUselessReplyOpacity: "true",
 				replaceEmoji: "noto",
 				replaceTheme: "false",
 				replaceBackground: "bing",
@@ -173,25 +177,31 @@
 		},
 		showToast(htmlContent, duration = 3000) {
 			/**
-			 * 显示 Toast 提示
-			 * @param {string} htmlContent - 自定义的HTML内容
-			 * @param {number} duration - 持续时间（毫秒），默认3000ms
+			 * 显示一个 Toast 提示
+			 * @param {string} htmlContent - 自定义的 HTML 内容
+			 * @param {number} duration - 持续时间（毫秒）
 			 */
+			const toasts = $('.helper-toast');
+
+			if (toasts.length > 1) {
+				toasts.not(toasts.last())
+					.removeClass('show')
+					.off('transitionend')
+					.on('transitionend', function () {
+						$(this).remove();
+					});
+			}
+
 			const toast = $('<div>', {
 				class: 'helper-toast',
 				html: htmlContent
-			});
+			}).css('z-index', $('.helper-toast').length + 9999);
+
 			$('body').append(toast);
-			const zIndex = $('.helper-toast').length + 9999;
-			toast.css('z-index', zIndex);
+			setTimeout(() => toast.addClass('show'), 10);
+
 			setTimeout(() => {
-				toast.addClass('show');
-			}, 10);
-			setTimeout(() => {
-				toast.removeClass('show');
-				toast.on('transitionend', function () {
-					toast.remove();
-				});
+				toast.removeClass('show').on('transitionend', () => toast.remove());
 			}, duration);
 		},
 		previewTopic(id) {
@@ -1009,7 +1019,7 @@
 									.post-stream .topic-post { display: none !important; }
 									.post-stream .topic-post.topic-owner { display: block !important; }
 								</style>`);
-								$("head").append(styleElement);
+								$("body").append(styleElement);
 							} else if (!isEnabled && styleElement) {
 								styleElement.remove();
 								styleElement = null;
@@ -1035,7 +1045,7 @@
 									.post-stream .topic-post:not(:first-of-type,:last-of-type) { display: none !important; }
 									.post-stream .topic-post.current-user-post { display: block !important; }
 								</style>`);
-								$("head").append(styleElement);
+								$("body").append(styleElement);
 							} else if (!isEnabled && styleElement) {
 								styleElement.remove();
 								styleElement = null;
@@ -1131,8 +1141,20 @@
 								<div class="dialog-body control-group">
 									<div class="controls">
 										<label>
-											<span>话题 - 列表显示 “创建时间”<br/><small>同时还会标注坟贴</small></span>
-											<input type="checkbox" data-setting="showTopicCreatedTime">
+											<span>话题 - 列表隐藏 “回复” 列<br/><small>隐藏回复数量</small></span>
+											<input type="checkbox" data-setting="hideRepliesColumn">
+										</label>
+										<label>
+											<span>话题 - 列表隐藏 “浏览量” 列<br/><small>隐藏浏览量</small></span>
+											<input type="checkbox" data-setting="hideViewsColumn">
+										</label>
+										<label>
+											<span>话题 - 列表隐藏 “活动” 列<br/><small>隐藏时间</small></span>
+											<input type="checkbox" data-setting="hideActivityColumn">
+										</label>
+										<label>
+											<span>话题 - 列表 “活动” 列添加创建时间<br/><small>同时还会标注坟贴</small></span>
+											<input type="checkbox" data-parent-setting="hideActivityColumn,false" data-setting="showTopicCreatedTime">
 										</label>
 										<label>
 											<span>帖子 - 在新标签页中打开链接<br/><small>仅适用于站内的 “话题”、“类别” 链接</small></span>
@@ -1157,6 +1179,10 @@
 										<label class="checkbox-label">
 											<span>帖子 - 折叠无用内容<br/><small>通过正则识别自动折叠缩小无用帖子<br/>正则规则及部分代码来源于 “<a href="https://linux.do/t/topic/481756/" target="_blank">LinuxDo 量子速读</a>”</small></span>
 											<input type="checkbox" data-setting="foldUselessReply">
+										</label>
+										<label class="checkbox-label">
+											<span>帖子 - 折叠后透明<br/><small>将折叠后的帖子内容变为半透明</small></span>
+											<input type="checkbox" data-parent-setting="foldUselessReply,true" data-setting="foldUselessReplyOpacity">
 										</label>
 										<label>
 											<span>页面 - 表情替换<br/><small>切换 Emoji 表情的风格</small></span>
@@ -1225,11 +1251,11 @@
 										</label>
 										<label>
 											<span>功能 - 自动滚动 - 速度<br/><small>滚动的速度</small></span>
-											<input type="number" min="1" step="1" data-setting="autoReaderSpeed">
+											<input type="number" min="1" step="1" data-parent-setting="autoReader,true" data-setting="autoReaderSpeed">
 										</label>
 										<label>
 											<span>功能 - 自动滚动 - 等待<br/><small>滚动到底部后要等待几秒再停止</small></span>
-											<input type="number" min="2" data-setting="autoReaderWait">
+											<input type="number" min="2" data-parent-setting="autoReader,true" data-setting="autoReaderWait">
 										</label>
 									</div>
 									<hr>
@@ -1239,19 +1265,19 @@
 									</blockquote>
 									<div align="center">
 										<label class="button" id="author">
-											<span>助手作者<br/><small>${runtimeInfo.script.author}</small></span>
+											<span>助手作者<br/><small>${runtimeInfo?.script?.author}</small></span>
 										</label>
 										<label class="button" id="name">
-											<span>助手名称<br/><small>${runtimeInfo.script.name}</small></span>
+											<span>助手名称<br/><small>${runtimeInfo?.script?.name}</small></span>
 										</label>
 										<label class="button" id="version">
-											<span>助手版本<br/><small>${runtimeInfo.script.version}</small></span>
+											<span>助手版本<br/><small>${runtimeInfo?.script?.version}</small></span>
 										</label>
 										<label class="button" id="handlerName">
-											<span>管理器名称<br/><small>${runtimeInfo.scriptHandler}</small></span>
+											<span>管理器名称<br/><small>${runtimeInfo?.scriptHandler}</small></span>
 										</label>
 										<label class="button" id="handlerVersion">
-											<span>管理器版本<br/><small>${runtimeInfo.version}</small></span>
+											<span>管理器版本<br/><small>${runtimeInfo?.version}</small></span>
 										</label>
 									</div>
 									<div id="debug" align="center" style="display: none;">
@@ -1303,16 +1329,13 @@
 									<div class="dots" style="--n:3;"></div>
 								</div>
 							</section>`);
+							base.showToast("刷新中...", 10000);
 							location.reload();
 						})
 
 						let clickCount = 0;
 						helperSettings.find("#version").on("click", (event) => {
-							if (clickCount === 0) {
-								clickCount++;
-								return;
-							}
-							const stepsRemaining = 6 - clickCount;
+							let stepsRemaining = 5 - clickCount;
 							if (stepsRemaining > 0) {
 								base.showToast(`你现在只需再执行 ${stepsRemaining} 步操作即可进入开发者模式。`);
 							} else {
@@ -1497,7 +1520,7 @@
 				element.append(`<style id="discourseHelper-Style">
 					html:has(#dialog-holder .dialog-content .dialog-body){overflow:hidden}
 					.dialog-container:not(:last-of-type):has(~ .dialog-container) {display:none!important}
-					.post-info.floor{color:var(--primary-med-or-secondary-med);margin-left:1em;font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace}
+					.post-info.floor{color:var(--primary-med-or-secondary-med);margin-left:1em;font-family:Consolas,Monaco,'Lucida Console','Liberation Mono','DejaVu Sans Mono','Bitstream Vera Sans Mono','Courier New',monospace}
 					div.topic-owner .topic-body .contents>.cooked::after{color:var(--tertiary-medium);content:"题主";margin-right:0.5em;position:sticky;bottom:0.5em;font-style:normal;}
 					a.previewTopic{color:var(--tertiary) !important;padding:0.1em}
 					a.expandTopic{color:var(--primary-med-or-secondary-med)!important;font-weight:normal!important;margin-left:1em}
@@ -1514,7 +1537,7 @@
 						background-color: rgb(70 70 70 / 80%);
 						backdrop-filter: blur(10px);
 						color: white;
-						box-shadow: 0 1px 10px 0 #000000;
+						box-shadow: 1px 1px 10px 0 #000000;
 						font-size: medium;
 						text-align: center;
 						opacity: 0;
@@ -1525,15 +1548,11 @@
 					.helper-toast strong{color:#FFD700}
 
 					.folded-post.row{display:flex;flex-direction:row}
-					.folded-post .topic-avatar{padding-top:10px}
-					.folded-post .topic-body{padding:0}
-					.folded-post .topic-body .contents .cooked{padding:0 var(--topic-body-width-padding)}
-					.folded-post .topic-body .contents .cooked > *{padding:4px 0;margin:0}
-					.folded-post .topic-body .contents .cooked > * > *{padding:0;margin:0}
-					.folded-post .topic-body .contents .cooked a{text-decoration:auto;font-weight:bold}
-					.folded-post .topic-body .contents .cooked > .names{display:flex;justify-content:space-between}
-					.folded-post .topic-body .contents .cooked > *:first-child{padding-top:8px}
-					.folded-post .topic-body .contents .cooked > *:last-child{padding-bottom:8px}
+					.folded-post .topic-avatar,.folded-post .topic-body{padding-top:10px}
+					.folded-post .topic-body .cooked{padding:0 var(--topic-body-width-padding)}
+					.folded-post .topic-body .cooked > *{padding:4px 0;margin:0}
+					.folded-post .topic-body .cooked > * > *{padding:0;margin:0}
+					.folded-post .topic-body .cooked > *:last-child{padding-bottom:8px}
 
 					#floating-nav{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;align-items:center;gap:15px;z-index:1002}
 					.floating-button{width:40px;height:40px;background-color:var(--tertiary);color:#fff;cursor:pointer;transition:background-color 0.2s,box-shadow 0.2s;display:flex;align-items:center;justify-content:center;border-radius:4px}
@@ -1544,7 +1563,25 @@
 				</style>`);
 			}, true)
 		},
+		hideRepliesColumn() {
+			base.waitForKeyElements("body", (element) => {
+				element.append(`<style>.topic-list .posts {display: none}</style>`);
+			}, true);
+		},
+		hideViewsColumn() {
+			base.waitForKeyElements("body", (element) => {
+				element.append(`<style>.topic-list .views{display: none}</style>`);
+			}, true);
+		},
+		hideActivityColumn() {
+			base.waitForKeyElements("body", (element) => {
+				element.append(`<style>.topic-list .activity{display: none}</style>`);
+			}, true);
+		},
 		showTopicCreatedTime() {
+			base.waitForKeyElements("body", (element) => {
+				element.append(`<style>.topic-list .activity{width: 6em}</style>`);
+			}, true);
 			base.waitForKeyElements(".topic-list .age", (element) => {
 				let createTime = element.attr("title")?.match(/创建日期：([\s\S]*?)最新：/)?.[1];
 				if (createTime) {
@@ -1579,34 +1616,33 @@
 		topicNewTab() {
 			// 话题列表中的每个项目
 			base.waitForKeyElements('.topic-list-item, tr', (element) => {
-				let anchor = element.find('a.title'); // 项目中的链接
+				let anchor = element.find('a.title');
 				if (!anchor.length > 0 || anchor.attr("target") === "_blank") return;
 
-				let elemclone = element.clone(); // 复制项目，去除原有点击事件
-
-				let aclones = elemclone.find('a'); // 复制后的项目的链接
+				let aclones = element.find('a');
 				aclones.each((index, element) => {
 					element = $(element)
-					if (!element.attr("href")) return;
-					element.attr("target", "_blank"); // 设置新标签页打开
-					element.attr("href", base.getFullLink(element.attr('href'))); // 替换为完整链接
-					element.on("click", (event) => {
-						event.stopPropagation(); // 停止链接冒泡，不映射到复制后的项目自己的点击事件
+					let elemclone = element.clone();
+					if (!element.attr("href") || element.data("user-card")) return;
+					elemclone.attr("target", "_blank");
+					elemclone.attr("href", base.getFullLink(element.attr('href')));
+					elemclone.on("click", (event) => {
+						event.stopPropagation();
 					});
+					element.replaceWith(elemclone);
 				})
-				element.replaceWith(elemclone); // 把原项目替换成复制后的项目
 			});
 
 			// 搜索结果链接
 			base.waitForKeyElements('.item > a.search-link', (element) => {
 				if (element.attr("target") === "_blank") return;
 
-				let elemclone = element.clone(); // 复制项目，去除原有点击事件
+				let elemclone = element.clone();
 
-				elemclone.attr("target", "_blank"); // 设置新标签页打开
-				elemclone.attr("href", base.getFullLink(elemclone.attr('href'))); // 替换为完整链接
+				elemclone.attr("target", "_blank");
+				elemclone.attr("href", base.getFullLink(elemclone.attr('href')));
 				elemclone.on("click", (event) => {
-					event.stopPropagation(); // 停止链接冒泡，不映射到复制后的项目自己的点击事件
+					event.stopPropagation();
 				});
 
 				element.replaceWith(elemclone);
@@ -1624,12 +1660,12 @@
 			`, (element) => {
 				if (element.attr("target") === "_blank") return;
 
-				let elemclone = element.clone(); // 复制项目，去除原有点击事件
+				let elemclone = element.clone();
 
-				elemclone.attr("target", "_blank"); // 设置新标签页打开
-				elemclone.attr("href", base.getFullLink(elemclone.attr('href'))); // 替换为完整链接
+				elemclone.attr("target", "_blank");
+				elemclone.attr("href", base.getFullLink(elemclone.attr('href')));
 				elemclone.on("click", (event) => {
-					event.stopPropagation(); // 停止链接冒泡，不映射到复制后的项目自己的点击事件
+					event.stopPropagation();
 				});
 
 				element.replaceWith(elemclone);
@@ -1711,12 +1747,14 @@
 			})
 		},
 		autoHeight() {
-			$("head").append(`<style>
-				.topic-body .cooked {
-					max-height:600px!important;
-					overflow-y:auto!important;
-				}
-			</style>`);
+			base.waitForKeyElements("body", (element) => {
+				element.append(`<style>
+					.topic-body .cooked {
+						max-height:600px!important;
+						overflow-y:auto!important;
+					}
+				</style>`);
+			}, true);
 		},
 		expandReply() {
 			base.waitForKeyElements("nav.post-controls > button.show-replies", (element) => {
@@ -1724,75 +1762,6 @@
 				element.click();
 				element.data("checked", "true");
 			})
-			// 下面的文章元素非常刁钻，稍有不慎改加载位置就有可能会整体卡住
-			base.waitForKeyElements(".post-stream > div.topic-post.clearfix.regular", (element) => {
-				let func = () => {
-					if (element.data("checked") || element.find(`.reply-to-tab`).length <= 0) return;
-					let cooked = element.find(".regular > .cooked");
-					let metadata = element.find(".topic-meta-data");
-					let avatar = element.find(".topic-avatar .post-avatar");
-					let floor = element.find("article.boxed").attr("id")?.match(/^post_(\d+)/)?.[1];
-
-					if (!cooked.length || !metadata.length || element.find(`.folded-post[floor="${floor}"]`).length) return;
-
-					let content = cooked.clone();
-					content.find("a.lightbox, aside.quote, .cooked-selection-barrier, br, img").remove()
-					content = content.text();
-					let name = metadata.find(".names .first");
-					let reply = $(metadata.find(".reply-to-tab")[0].outerHTML);
-					reply.css("margin", "0");
-					reply.css("cursor", "auto");
-					reply.attr("title", "");
-					reply.find("[title]").attr("title", "");
-					let article = $(`<div class="row folded-post" floor="${floor}">
-						<div class="topic-avatar">
-							<div class="post-avatar">${avatar.html()}</div>
-						</div>
-						<div class="topic-body">
-							<div class="regular contents">
-								<div class="cooked">
-									<p class="names">
-										<span>${name.html()}</span>
-										<span class="post-infos" style="display:flex;">
-											<a title="展开" class="post-info expandTopic">
-												<svg class="fa d-icon svg-icon svg-string" xmlns="http://www.w3.org/2000/svg">
-													<use href="#caret-down"></use>
-												</svg>
-												<span class="floor">${GM_getValue("topicFloorIndicator") === "true" && floor ? `L${floor}` : ""}</span>
-											</a>
-										</span>
-									</p>
-									<p>${content.length > 30 ? (content.substring(0, 30) + '……') : content}</p>
-								</div>
-							</div>
-						</div>
-					</div>`);
-					element.append(article);
-					article.find(".post-infos").prepend(reply)
-					article.find(".expandTopic").on("click", (event) => {
-						element.data("checked", true);
-						article.prevAll().css({
-							"height": "",
-							"width": "",
-							"opacity": "",
-							"pointer-events": ""
-						});
-						article.remove();
-					});
-					article.prevAll().css({
-						"height": "0",
-						"width": "0",
-						"opacity": "0",
-						"pointer-events": "none"
-					});
-				}
-				// 异步操作，减少卡顿
-				if (window.requestIdleCallback) {
-					requestIdleCallback(func);
-				} else {
-					func();
-				}
-			});
 		},
 		foldUselessReply() {
 			// 部分代码来源于 “Linux Do 量子速读” 脚本
@@ -1803,7 +1772,6 @@
 
 					let cooked = element.find(".cooked");
 					let metadata = element.find(".topic-meta-data");
-					let avatar = element.find(".topic-avatar .post-avatar");
 					let floor = element.find("article.boxed").attr("id")?.match(/^post_(\d+)/)?.[1];
 
 					if (!cooked.length || !metadata.length || element.find(`.folded-post[floor="${floor}"]`).length) return;
@@ -1811,31 +1779,51 @@
 					if (base.isMeaninglessReply(cooked.text())) {
 						let content = cooked.clone();
 						content.find(".cooked-selection-barrier, br").remove()
-						let name = metadata.find(".names .first");
 						let article = $(`<div class="row folded-post" floor="${floor}">
 							<div class="topic-avatar">
-								<div class="post-avatar">${avatar.html()}</div>
+								<div class="post-avatar">${element.find(".topic-avatar .post-avatar").html()}</div>
 							</div>
 							<div class="topic-body">
-								<div class="regular contents">
-									<div class="cooked">
-										<p class="names">
-											<span>${name.html()}</span>
-											<span>
-												<a title="展开" class="topic-status expandTopic">
-													<svg class="fa d-icon svg-icon svg-string" xmlns="http://www.w3.org/2000/svg">
-														<use href="#caret-down"></use>
-													</svg>
-												</a>
-												<span class="post-info floor">${GM_getValue("topicFloorIndicator") === "true" && floor ? `L${floor}` : ""}</span>
-											</span>
-										</p>
-										${content.html()}
+								<div class="topic-meta-data embedded-reply">
+									<div class="names trigger-user-card">${metadata.find(".names .first")[0].outerHTML}</div>
+									<div class="post-infos" style="display:flex;">
+										<a title="展开" class="topic-status expandTopic">
+											<svg class="fa d-icon svg-icon svg-string" xmlns="http://www.w3.org/2000/svg">
+												<use href="#caret-down"></use>
+											</svg>
+										</a>
+										<span class="post-info floor">${GM_getValue("topicFloorIndicator") === "true" && floor ? `L${floor}` : ""}</span>
 									</div>
 								</div>
+								<div class="cooked">${content.html()}</div>
 							</div>
 						</div>`);
-						element.append(article);
+						let reply = metadata.find(".reply-to-tab").clone();
+						if (reply.length > 0) {
+							reply.css("margin", "0");
+							reply.css("cursor", "auto");
+							reply.attr("title", "");
+							reply.find("[title]").attr("title", "");
+							article.find(".post-infos").prepend(reply)
+						}
+						let state = metadata.find(".read-state").clone();
+						if (state.length > 0) {
+							let observer = new MutationObserver((mutationsList) => {
+								mutationsList.forEach((mutation) => {
+									if (mutation.type === "attributes") {
+										state.attr(mutation.attributeName, metadata.find(".read-state").attr(mutation.attributeName));
+									} else if (mutation.type === "childList") {
+										state.empty().append(metadata.find(".read-state").contents().clone());
+									}
+								});
+							});
+							observer.observe(metadata.find(".read-state")[0], {
+								attributes: true,
+								childList: true,
+								subtree: true
+							});
+							article.find(".post-infos").prepend(state)
+						}
 						article.find(".expandTopic").on("click", (event) => {
 							article.hide();
 							article.prevAll().css({
@@ -1845,6 +1833,7 @@
 								"pointer-events": ""
 							});
 						});
+						element.append(article);
 						// 感觉怎么样？
 						// 我隐藏了大部分帖子的元素，但是我保留了一部分，我觉得保留一部分才能知道被隐藏帖子的位置。
 						// 你是有意把这部分保留的吗？
@@ -1866,6 +1855,14 @@
 					func();
 				}
 			});
+		},
+		foldUselessReplyOpacity() {
+			base.waitForKeyElements("body", (element) => {
+				element.append(`<style>
+					.folded-post.row{transition:opacity 0.3s ease;opacity:0.5}
+					.folded-post.row:hover{opacity:1}
+				</style>`);
+			}, true);
 		},
 		replaceEmoji(style = "fluentui") {
 			let emojiStyles = [
@@ -1924,7 +1921,7 @@
 		},
 		async replaceTheme(style) {
 			let hasStyle = base.themeStyles.some(themeStyle => themeStyle.label === style);
-			let custom = GM_getValue("replaceBackground")
+			let custom = GM_getValue("replaceBackground");
 			if (hasStyle) {
 				let themeStyle = base.themeStyles.find(themeStyle => themeStyle.label === style);
 				let styles = $(`<discourse-${themeStyle.label}-stylesheets>${themeStyle.content}</discourse-${themeStyle.label}-stylesheets>`)
@@ -1966,7 +1963,9 @@
 						}
 						.sidebar-wrapper,
 						.sidebar-footer-wrapper,
-						.sidebar-footer-wrapper .sidebar-footer-container::before {
+						.sidebar-footer-wrapper .sidebar-footer-container::before,
+						.user-content,
+						.post-list .post-list-item {
 							background: transparent !important;
 						}
 						aside.onebox {
@@ -1990,7 +1989,7 @@
 		newTabIndicator() {
 			base.waitForKeyElements("body", (element) => {
 				element.append(`<style>
-					a[target="_blank"]:not([data-clicks], [data-user-card], .badge, .badge-posts, .post-activity, .search-link):after,
+					a[target="_blank"]:not([data-clicks], [data-user-card], .badge, .badge-posts, .post-activity, .search-link, .lightbox, .topic-excerpt):after,
 					a.search-link[target="_blank"] .topic-title:after {
 						content: "\u2197\ufe0e";
 						margin-left: 0.2em;
@@ -2115,11 +2114,38 @@
 			discourse.addMenu();
 			discourse.addStyle();
 
+			if (GM_getValue("hideRepliesColumn") === "true") {
+				discourse.hideRepliesColumn();
+			}
+			if (GM_getValue("hideViewsColumn") === "true") {
+				discourse.hideViewsColumn();
+			}
+			if (GM_getValue("hideActivityColumn") === "true") {
+				discourse.hideActivityColumn();
+			}
+			if (GM_getValue("showTopicCreatedTime") === "true" && GM_getValue("hideActivityColumn") !== "true") {
+				discourse.showTopicCreatedTime();
+			}
 			if (GM_getValue("topicNewTab") === "true") {
 				discourse.topicNewTab();
 			}
-			if (GM_getValue("a11yCloseButton") === "true") {
-				discourse.a11yCloseButton();
+			if (GM_getValue("previewTopic") === "true") {
+				discourse.topicPreview();
+			}
+			if (GM_getValue("topicFloorIndicator") === "true") {
+				discourse.topicFloorIndicator();
+			}
+			if (GM_getValue("autoHeight") === "true") {
+				discourse.autoHeight();
+			}
+			if (GM_getValue("expandReply") === "true") {
+				discourse.expandReply();
+			}
+			if (GM_getValue("foldUselessReply") === "true") {
+				discourse.foldUselessReply();
+			}
+			if (GM_getValue("foldUselessReply") === "true" && GM_getValue("foldUselessReplyOpacity") === "true") {
+				discourse.foldUselessReplyOpacity();
 			}
 			if (GM_getValue("replaceEmoji") !== "false") {
 				discourse.replaceEmoji(GM_getValue("replaceEmoji"));
@@ -2130,32 +2156,17 @@
 			if (GM_getValue("optimizePageText") === "true") {
 				discourse.optimizePageText();
 			}
+			if (GM_getValue("newTabIndicator") === "true") {
+				discourse.newTabIndicator();
+			}
+			if (GM_getValue("a11yCloseButton") === "true") {
+				discourse.a11yCloseButton();
+			}
 			if (GM_getValue("optimizeEditorButton") === "true") {
 				discourse.optimizeEditorButton();
 			}
 			if (GM_getValue("japaneseEditorButton") === "true") {
 				discourse.japaneseEditorButton();
-			}
-			if (GM_getValue("previewTopic") === "true") {
-				discourse.topicPreview();
-			}
-			if (GM_getValue("topicFloorIndicator") === "true") {
-				discourse.topicFloorIndicator();
-			}
-			if (GM_getValue("showTopicCreatedTime") === "true") {
-				discourse.showTopicCreatedTime();
-			}
-			if (GM_getValue("newTabIndicator") === "true") {
-				discourse.newTabIndicator();
-			}
-			if (GM_getValue("autoHeight") === "true") {
-				discourse.autoHeight();
-			}
-			if (GM_getValue("expandReply") === "true") {
-				discourse.expandReply();
-			}
-			if (GM_getValue("foldUselessReply") === "true") {
-				discourse.foldUselessReply();
 			}
 		}
 	}
