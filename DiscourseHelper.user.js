@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name          Discourse 助手
 // @namespace     github.com/hmjz100
-// @version       1.0.7
+// @version       1.0.7.1
 // @author        Hmjz100
 // @description   重构“linuxdo 增强插件”，再次以脚本方式为您呈现！
 // @license       AGPL-3.0-or-later
@@ -54,7 +54,7 @@
 				replaceFontName: "MiSans",
 				replaceFontStyle: "https://unpkg.com/misans@4.0.0/lib/Normal/MiSans-Medium.min.css",
 				optimizeBiliPlayer: "true",
-				optimizeBiliPlayerMobile: "false",
+				optimizeBiliPlayerMobile: "true",
 				optimizePageText: "false",
 				newTabIndicator: "true",
 				a11yCloseButton: "true",
@@ -1247,7 +1247,7 @@
 											<input type="checkbox" data-setting="optimizeBiliPlayer">
 										</label>
 										<label>
-											<span>功能 - 优化哔哩内嵌 - 替换为移动版播放器<br/><small>播放器更精简，但“关闭自动播放”会失效<br/>点击播放器不会自动跳转视频页面</small></span>
+											<span>功能 - 优化哔哩内嵌 - 替换为移动版播放器<br/><small>播放器更精简，支持触控/字幕，添加跳转原视频按钮<br/>点击播放器还不会跳转到视频页面</small></span>
 											<input type="checkbox" data-parent-setting="optimizeBiliPlayer,true" data-setting="optimizeBiliPlayerMobile">
 										</label>
 										<label>
@@ -1601,9 +1601,16 @@
 					.folded-post .topic-body .cooked > *{padding:0;margin:0}
 
 					#floating-nav{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;align-items:center;gap:15px;z-index:1002}
-					.floating-button{width:40px;height:40px;background-color:var(--tertiary);color:#fff;cursor:pointer;transition:background-color 0.2s,box-shadow 0.2s;display:flex;align-items:center;justify-content:center;border-radius:4px}
+					.floating-button,.biliButton{background-color:var(--tertiary);color:#fff;cursor:pointer;border:none;padding:0;transition:background-color 0.2s,box-shadow 0.2s,opacity 0.2s;display:flex;align-items:center;justify-content:center;border-radius:4px}
+					.floating-button svg,.biliButton svg{fill:#fff}
+
+					.biliButton{position:absolute;top:20px;right:20px;width:24px;height:24px;opacity:0.8}
+					.biliButton:hover{opacity:1}
+					.biliButton svg{width:12px;height:12px}
+
+					.floating-button{width:40px;height:40px}
 					.floating-button:hover,.floating-button.hover{box-shadow:0 0 10px 0px #cccccc66;background-color:var(--tertiary-hover)}
-					.floating-button svg{width:24px;height:24px;fill:#fff}
+					.floating-button svg{width:24px;height:24px}
 					.floating-button:before{transition:all 0.2s;position:absolute;transform:translateY(110%);background-color:rgba(0,0,0,0.8);color:white;padding:5px 10px;border-radius:4px;font-size:12px;white-space:nowrap;pointer-events:none;border-radius:5px;color:#fff;content:attr(data-title);z-index:2;opacity:0}
 					.floating-button:hover:before{opacity:1}
 				});
@@ -1627,7 +1634,7 @@
 		},
 		showTopicCreatedTime() {
 			base.waitForKeyElements("html", (element) => {
-				element.append(`<style>.topic-list .activity{width: 6em}</style>`);
+				element.append(`<style>.topic-list .activity{width: 6em !important}</style>`);
 			}, true);
 			base.waitForKeyElements(".topic-list .age", (element) => {
 				let createTime = element.attr("title")?.match(/创建日期：([\s\S]*?)最新：/)?.[1];
@@ -2051,16 +2058,49 @@
 				try { url = new URL(url, location.href) } catch (e) { return }
 				if (url.host !== "player.bilibili.com") return;
 				let params = url.searchParams;
+
 				if (!params.has("autoplay") || params.get("autoplay") !== "0") {
 					params.set("autoplay", "0");
 				}
 				if (!params.has("hideCoverInfo") || params.get("hideCoverInfo") !== "1") {
 					params.set("hideCoverInfo", "1");
 				}
+
 				if (GM_getValue("optimizeBiliPlayerMobile") === "true") {
 					url.host = "www.bilibili.com";
 					url.pathname = "/blackboard/html5mobileplayer.html";
+					params.delete("hideCoverInfo");
+					params.delete("autoplay");
+					let getVideoId = () => {
+						let bvid = params.get('bvid') || params.get('bvid');
+						if (bvid) return `BV${bvid.replace('BV', '')}`;
+						let aid = params.get('aid') || params.get('aid');
+						if (aid) return `av${aid.replace('av', '')}`;
+						let pathMatch = url.pathname.match(/(av\d+|BV\w+)/);
+						return pathMatch ? pathMatch[0] : null;
+					};
+					let videoId = getVideoId();
+					let jumpBtn = $('<button>')
+						.addClass("biliButton")
+						.attr("title", "跳转原视频")
+						.html('<svg><use xlink:href="#up-right-from-square"></use></svg>')
+						.click(() => {
+							if (videoId) {
+								window.open(`https://www.bilibili.com/video/${videoId}`, '_blank');
+							} else {
+								alert("错误：未匹配到视频标识符。")
+							}
+						});
+
+					elemclone.attr("src", url.href);
+					elemclone.data("checked", true);
+					element.replaceWith($('<div>').css({
+						position: 'relative',
+						display: 'inline-block'
+					}).append(elemclone, jumpBtn));
+					return;
 				}
+
 				elemclone.attr("src", url.href);
 				elemclone.data("checked", true);
 				element.replaceWith(elemclone);
