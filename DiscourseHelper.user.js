@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name          Discourse 助手
 // @namespace     github.com/hmjz100
-// @version       1.0.7.1
+// @version       1.0.7.2
 // @author        Hmjz100
-// @description   重构“linuxdo 增强插件”，再次以脚本方式为您呈现！
+// @description   重构“linuxdo 增强插件”，再次以脚本方式为您呈现！界面更优美，设计更精髓！
 // @license       AGPL-3.0-or-later
 // @icon          data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEl0lEQVRYw72Xe0yVZRzHv8SdUhk2FYGOnLwsQKYjZ5epZQPsQirOUWbFvJXmpWmWNXG6rFjkYGVmMkomTkzlAIdL4H3VzHSWy+a0ieQllRREBQ+Xcz79cY5LD+/hqj3bb2d7n+d9Pp/n977neX6v1PkWKClZUp6kE5JaJOEKh6TTknZIel1SsO5ii5C0QdLF24AdRa2kXEnmnsIzJDV3AewerZLWdAdsknSoB2D3OOTKZKfaY5JqOprUS8JbXl2R+FtSTEfwwZKueprk0YD7WRQ8gI39zZSGD6XCNIz8CDMr+g4kPqAP3rqvI4mLksI9wf0kHTe6Mco/kJwBkZw0x3J+ZAw1Y4ZQlxBB/fPhNE4ZhG2imevPRLI/KpQJ/v6deRyGbZ3RDUm9gvltUAzV0cO5kBBJ/dRQGt6OxfbVFFr2LsN+MgtH1Rc4fk+HkvmwMpH04f07kljhDo/xBD8eGUtVXBS1yWHceGMYTcULoGEb8D1QDpS6osx1rQwuZlP4bgL+ngVuShp4u4DFfZDJ14+DpmiqRkRRN2UgDe+Nxn4uG6gAezE0FRhHs8UlVMn7WSntZeHLW/BQSTb3ARn9Iqh+JJZ/XgynYdloHLV5ztV5AruHw0p1az6Bi55tb7N6QJLmuneG+vhy2BTNuacGc2OmGfuptc50dxZ+K7Ay41g6mjDZk8QLklTm3pHSO4TqYbFcTgrFlvuqM+3Nlq4LOErYfCYd5XyCgiONBLLl2iDu6EgLCeNCXBTXUs3Yz24ASroObyoAu5Ujl9ai0lUoJc1I4KiMUrM8JIzLTz5M40fjnS9Ud1bfVACtxfxV9w3e1tlotcVI4LqhQFpIGPXjTDRtSXX+tboDdwmcvJKDtqegTUdRYLCRRFuBJcGh1I8ZROvepT0TsFvZfe5zlJ+MCs6gAUM6JzDGvzcX4iKx717SMwFKyTiWhrZMRwWXUb82L2K9oYC3vNhlCofc17ov0GyBliLiKl5C21ehTZeQf5A761d52qmm+femceHTQBG0FHZr9flVa1DeWFS6B63ea8RZ51EgSF788XgknP8aHMVdfva11/MJK5qEtsxGu0DJ7xhxEj0KRMmHujnjoGVH1zLgsGK7uY0ndqaivHhUcgRtPI+CerkzalyFrrHA9IBAqPzgzneg2WK8JzRboLUYKOXElW+JKX8Z5Y1HlhJUARr/ihEj49ZhZCjw6SgzNOY7099a5Pxt3gpN+eAo+u8YdpRAazGn63KZf2gxvt/Fo82TUeF+tBOU+rHR/Nck9W1X4EDmDGAfYOVP22ZWnsok9oc1DNmXSdLPi5nzyzzmHJxLyo+zGFE+Fe+t8SgvGW1fjyquIito4kJPh9DS22uBNgP6Bvhx8KfPyDiwjrHrP0SL3kRTZ6Gx09BzC1DWNlRciaxlyFqISipR+WG00+YEpxWhoaM8wfe4V0NtBvn4eOMX0gfJx3gS7yA0MglNWobmZaO3ctDMLJQwC5mi2ytCTkl6sEOBexRVkh4yKkb/D/geSf08VcP3EtwgaXlHHyP3AnxWUmZ7q77bAjWSjrj29kRJvp39DvwXHVKWNlLwEiAAAAAASUVORK5CYII=
 // @match         *://linux.do/*
@@ -214,25 +214,37 @@
 		previewTopic(id) {
 			let preViewer = `<div id="dialog-holder" class="dialog-container">
 				<style>
-					#dialog-holder:not([aria-hidden="true"]){position:fixed;top:0;left:0;width:100%;height:100%;display:flex;justify-content:center;align-items:center}
-					#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-body{max-height:600px}
-					#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-footer{display:flex;justify-content:flex-end;bottom:0;background-color:var(--secondary);position:sticky}
-					#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-footer .btn{margin:0 0 var(--btn-bottom-margin) 1em}
-					#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-body > .title{font-size:var(--font-up-3);font-weight:600;padding:0 30px 0;margin-bottom:0}
-					#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-body > .date{padding:0 30px 0}
-					#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-body .date{color:#666}
+					#dialog-holder:not([aria-hidden="true"]){position:fixed;top:0;left:0;width:100%;height:100%;display:flex !important;justify-content:center;align-items:center}
+					#dialog-holder:not([aria-hidden="true"]) .dialog-content{max-height:97%;max-width:95%;min-height:auto;min-width:auto;display:flex;flex-direction:column}
+					#dialog-holder:not([aria-hidden="true"]) .dialog-content a{margin:0}
+					#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-header{justify-content:space-between}
+					#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-header > .title{font-size:var(--font-up-3);font-weight:600}
+					#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-header > .date{color:#666;font-family:serif}
+
+					#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-body{max-height:none;max-width:none;margin:0;width:calc(100% - 2em)}
 					#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-body .content {padding:0;margin:0}
 					#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-body .content > .item:not(:last-child){border-bottom:1px solid var(--primary-low)}
-					#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-body .content > .item{display:flex;align-items:flex-start;margin:15px 30px 0}
+					#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-body .content > .item{display:flex;align-items:flex-start}
 					#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-body .content > .item .floor,#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-body .content > .item .avatar img.avatar{width:30px;height:30px;text-align:center;margin-top:15px}
 					#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-body .content > .item .post{flex:1;padding:15px;word-break:break-all}
 					#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-body .content > .item .post pre code{max-width:620px}
 					#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-body .content > .item .post img{max-width:100%;max-height:100%;height:auto}
 					#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-body .content > .item .post .name{font-size:16px;color:var(--primary-high-or-secondary-low);display:flex;justify-content:space-between;align-items:center}
 					#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-body .content > .item .post .date{color:#b9b9b9;font-size:16px;margin-left:auto}
+
+					#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-footer{display:flex;justify-content:space-between;bottom:0;background-color:var(--secondary);position:sticky}
+					#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-footer .btn{margin:0 0 var(--btn-bottom-margin)}
+
+					@media screen and (max-width: 1000px){
+						#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-header{display:grid;justify-content:flex-start;align-items:flex-start;gap:5px}
+						#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-body .content > .item .post > *{white-space:normal;word-wrap:break-word;overflow-wrap:break-word;word-break:break-word}
+					}
 				</style>
 				<div class="dialog-overlay"></div>
 				<div class="dialog-content">
+					<div class="dialog-header">
+						<span class="title">预览</span><span class="date"></span>
+					</div>
 					<div class="dialog-body">
 						<p style="text-align: center">...</p>
 					</div>
@@ -252,7 +264,7 @@
 				<style>
 					.d-splash{--dot-color:var(--tertiary);display:grid;place-items:center;height:10vh;background-color:var(--secondary)}
 					.d-splash .preloader{--splash-dot-size:max(1vw,25px);--splash-dot-spacing:calc(var(--splash-dot-size) * 1.5);width:calc((var(--splash-dot-size) + var(--splash-dot-spacing)) * 5)}
-					.d-splash .preloader .dots{animation-name:d-splash-loader;animation-timing-function:ease-in-out;animation-duration:2s;animation-iteration-count:infinite;animation-delay:calc(var(--n) * 0.15s);position:absolute;top:calc(50% - var(--splash-dot-size) / 0.6);left:calc((50% - var(--splash-dot-size) / 2) + (var(--n) * var(--splash-dot-spacing)));transform-origin:calc((var(--splash-dot-spacing) * var(--n) * -1) + var(--splash-dot-size)/2) center;width:var(--splash-dot-size);height:var(--splash-dot-size);border-radius:50%;background-color:var(--dot-color);filter:saturate(2) opacity(0.85);opacity:0}
+					.d-splash .preloader .dots{animation-name:d-splash-loader;animation-timing-function:ease-in-out;animation-duration:2s;animation-iteration-count:infinite;animation-delay:calc(var(--n) * 0.15s);position:absolute;top:calc(50% - var(--splash-dot-size) / 1.5);left:calc((50% - var(--splash-dot-size) / 2) + (var(--n) * var(--splash-dot-spacing)));transform-origin:calc((var(--splash-dot-spacing) * var(--n) * -1) + var(--splash-dot-size)/2) center;width:var(--splash-dot-size);height:var(--splash-dot-size);border-radius:50%;background-color:var(--dot-color);filter:saturate(2) opacity(0.85);opacity:0}
 					@keyframes d-splash-fade-in{0%{opacity:0}100%{opacity:1}}
 					@keyframes d-splash-loader{0%{opacity:0;transform:scale(1)}45%{opacity:1;transform:scale(0.7)}65%{opacity:1;transform:scale(0.7)}100%{opacity:0;transform:scale(1)}}
 				</style>
@@ -281,18 +293,14 @@
 			fetch(`/t/${id}.json`)
 				.then((response) => response.json()).then((data) => {
 					if (!viewer.length > 0) return;
-					viewer.find(".dialog-content .dialog-body").html(`
-						<p class="title">${data.title}</p>
-						<p class="date">${base.formatDate(data.created_at)}</p>
-						<div class="content"></div>
-					`);
+					viewer.find(".dialog-content .dialog-header").html(`<span class="title">${data.title}</span><span class="date">${base.formatDate(data.created_at)}</span>`)
+					viewer.find(".dialog-content .dialog-body").html(`<div class="content"></div>`);
 					$.each(data.post_stream.posts, function (index, post) {
 						let elempost = $(`<div class="item">
 							${post?.avatar_template ? '<div class="avatar"><img class="avatar" src="' + base.getFullLink(post?.avatar_template.replace("{size}", "50")) + '"/></div>' : ""}
 							<div class="post">
 								<div class="name">
-									${post.display_username ? "<span>" + post.display_username + "</span>" : ""}
-									${post.username ? '<span' + (post.display_username ? ' style="margin-left: 20px;"' : '') + '>' + post.username + '</span>' : ''}
+									${post.display_username ? "<span>" + post.display_username + "</span>" : post.username ? "<span>" + post.username + "</span>" : ""}
 									<div class="date">${base.formatDate(post.created_at)}</div>
 								</div>
 								<p>${post.cooked || (post.action_code ? "<i>动作: " + post.action_code + "</i>" : "")}</p>
@@ -1123,12 +1131,12 @@
 						let helperSettings = $(`<div id="dialog-holder" class="dialog-container">
 							<style>
 								#dialog-holder:not([aria-hidden="true"]){position:fixed;top:0;left:0;width:100%;height:100%;display:flex !important;justify-content:center;align-items:center}
-								#dialog-holder:not([aria-hidden="true"]) .dialog-content,#dialog-holder:not([aria-hidden="true"]) .dialog-content > div{min-width:auto}
+								#dialog-holder:not([aria-hidden="true"]) .dialog-content{max-height:97%;max-width:95%;min-height:auto;min-width:auto;display:flex;flex-direction:column}
 								#dialog-holder:not([aria-hidden="true"]) .dialog-content a{margin:0}
 								#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-header{justify-content:space-between}
 								#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-header > .title{font-size:var(--font-up-3);font-weight:600}
 								#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-header > .date{color:#666;font-family:serif}
-								#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-body{max-height:600px;padding:10px;margin:0}
+								#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-body{max-height:none;max-width:none;margin:0;width:calc(100% - 2em)}
 								#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-body label{display:flex;justify-content:space-between;padding:10px;align-items:center;text-align:left;transition:background 0.2s ease}
 								#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-body label.button{cursor:pointer;user-select:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none}
 								#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-body label:hover{background:rgba(var(--primary-rgb), 0.1)}
@@ -1579,14 +1587,15 @@
 						left: 50%;
 						transform: translateX(-50%);
 						z-index: 9999;
-						max-width: 50%;
+						max-width: 90%;
 						padding: 10px 20px;
 						border-radius: 50px;
 						background-color: rgb(70 70 70 / 80%);
 						backdrop-filter: blur(10px);
 						color: white;
 						box-shadow: 1px 1px 10px 0 #000000;
-						font-size: medium;
+						font-size: small;
+						white-space: nowrap;
 						text-align: center;
 						opacity: 0;
 						pointer-events: none;
@@ -1596,11 +1605,14 @@
 					.helper-toast strong{color:#FFD700}
 
 					.folded-post.row{display:flex;flex-direction:row}
+					.mobile-view .folded-post.row{display:block;border-top:1px solid var(--primary-low)}
+					.mobile-view .topic-post.regular:has(.folded-post.row:not([style*="display: none"])) {position: relative}
 					.folded-post .topic-avatar,.folded-post .topic-body{padding-top:10px}
 					.folded-post .topic-body .cooked{padding:0 var(--topic-body-width-padding) 10px}
 					.folded-post .topic-body .cooked > *{padding:0;margin:0}
+					.mobile-view .folded-post .topic-body .cooked{padding:0 0 10px}
 
-					#floating-nav{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;align-items:center;gap:15px;z-index:1002}
+					#floating-nav{position:fixed;bottom:50px;right:20px;display:flex;flex-direction:column;align-items:center;gap:13px;z-index:1000}
 					.floating-button,.biliButton{background-color:var(--tertiary);color:#fff;cursor:pointer;border:none;padding:0;transition:background-color 0.2s,box-shadow 0.2s,opacity 0.2s;display:flex;align-items:center;justify-content:center;border-radius:4px}
 					.floating-button svg,.biliButton svg{fill:#fff}
 
@@ -1895,9 +1907,12 @@
 				article.find(".expandTopic").on("click", () => {
 					article.hide();
 					article.prevAll().css({
-						height: "",
-						width: "",
-						opacity: "",
+						"height": "",
+						"width": "",
+						"opacity": "",
+						"position": "",
+						"top": "",
+						"left": "",
 						"pointer-events": "",
 					});
 				});
@@ -1909,9 +1924,12 @@
 				fold.on("click", () => {
 					article.show();
 					article.prevAll().css({
-						height: "0",
-						width: "0",
-						opacity: "0",
+						"height": "0",
+						"width": "0",
+						"opacity": "0",
+						"position": "absolute",
+						"top": "1px",
+						"left": "1px",
 						"pointer-events": "none",
 					});
 				});
@@ -1922,9 +1940,12 @@
 				}
 				element.append(article);
 				article.prevAll().css({
-					height: "0",
-					width: "0",
-					opacity: "0",
+					"height": "0",
+					"width": "0",
+					"opacity": "0",
+					"position": "absolute",
+					"top": "1px",
+					"left": "1px",
 					"pointer-events": "none",
 				});
 			});
@@ -2065,6 +2086,14 @@
 				if (!params.has("hideCoverInfo") || params.get("hideCoverInfo") !== "1") {
 					params.set("hideCoverInfo", "1");
 				}
+				if (!params.has("highQuality") || params.get("highQuality") !== "1" || !params.has("high_quality") || params.get("high_quality") !== "1") {
+					params.set("highQuality", "1");
+					params.set("high_quality", "1");
+				}
+
+				if (!elemclone.attr("referrerpolicy") || elemclone.attr("referrerpolicy") !== "no-referrer") {
+					elemclone.attr("referrerpolicy", "no-referrer");
+				}
 
 				if (GM_getValue("optimizeBiliPlayerMobile") === "true") {
 					url.host = "www.bilibili.com";
@@ -2117,7 +2146,7 @@
 		newTabIndicator() {
 			base.waitForKeyElements("html", (element) => {
 				element.append(`<style>
-					a[target="_blank"]:not([data-clicks], [data-user-card], .badge, .badge-posts, .post-activity, .search-link, .lightbox, .topic-excerpt, :has(div)):after,
+					a[target="_blank"]:not([data-clicks], [data-user-card], .badge, .badge-posts, .post-activity, .search-link, .lightbox, .topic-excerpt, :has(div, .relative-date)):after,
 					a.search-link[target="_blank"] .topic-title:after {
 						content: "\u2197\ufe0e";
 						margin-left: 0.2em;
@@ -2247,8 +2276,7 @@
 					<style>
 						#d-splash{display:none!important}
 						#dialog-holder:not([aria-hidden="true"]){z-index:9999;position:fixed;top:0;left:0;width:100%;height:100%;display:flex !important;justify-content:center;align-items:center}
-						#dialog-holder:not([aria-hidden="true"]) .dialog-content,#dialog-holder:not([aria-hidden="true"]) .dialog-content > div{min-width:auto}
-						#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-body{max-height:600px;padding:10px;margin:0}
+						#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-body{max-height:none;max-width:none;margin:0;width:calc(100% - 2em)}
 						#dialog-holder:not([aria-hidden="true"]) .dialog-content {background-color:transparent;box-shadow:none}
 					</style>
 					<div class="dialog-content">
