@@ -1,12 +1,13 @@
 // ==UserScript==
 // @name          Discourse 助手
 // @namespace     github.com/hmjz100
-// @version       1.0.7.2
+// @version       1.0.7.3
 // @author        Hmjz100
 // @description   重构“linuxdo 增强插件”，再次以脚本方式为您呈现！界面更优美，设计更精髓！
 // @license       AGPL-3.0-or-later
 // @icon          data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEl0lEQVRYw72Xe0yVZRzHv8SdUhk2FYGOnLwsQKYjZ5epZQPsQirOUWbFvJXmpWmWNXG6rFjkYGVmMkomTkzlAIdL4H3VzHSWy+a0ieQllRREBQ+Xcz79cY5LD+/hqj3bb2d7n+d9Pp/n977neX6v1PkWKClZUp6kE5JaJOEKh6TTknZIel1SsO5ii5C0QdLF24AdRa2kXEnmnsIzJDV3AewerZLWdAdsknSoB2D3OOTKZKfaY5JqOprUS8JbXl2R+FtSTEfwwZKueprk0YD7WRQ8gI39zZSGD6XCNIz8CDMr+g4kPqAP3rqvI4mLksI9wf0kHTe6Mco/kJwBkZw0x3J+ZAw1Y4ZQlxBB/fPhNE4ZhG2imevPRLI/KpQJ/v6deRyGbZ3RDUm9gvltUAzV0cO5kBBJ/dRQGt6OxfbVFFr2LsN+MgtH1Rc4fk+HkvmwMpH04f07kljhDo/xBD8eGUtVXBS1yWHceGMYTcULoGEb8D1QDpS6osx1rQwuZlP4bgL+ngVuShp4u4DFfZDJ14+DpmiqRkRRN2UgDe+Nxn4uG6gAezE0FRhHs8UlVMn7WSntZeHLW/BQSTb3ARn9Iqh+JJZ/XgynYdloHLV5ztV5AruHw0p1az6Bi55tb7N6QJLmuneG+vhy2BTNuacGc2OmGfuptc50dxZ+K7Ay41g6mjDZk8QLklTm3pHSO4TqYbFcTgrFlvuqM+3Nlq4LOErYfCYd5XyCgiONBLLl2iDu6EgLCeNCXBTXUs3Yz24ASroObyoAu5Ujl9ai0lUoJc1I4KiMUrM8JIzLTz5M40fjnS9Ud1bfVACtxfxV9w3e1tlotcVI4LqhQFpIGPXjTDRtSXX+tboDdwmcvJKDtqegTUdRYLCRRFuBJcGh1I8ZROvepT0TsFvZfe5zlJ+MCs6gAUM6JzDGvzcX4iKx717SMwFKyTiWhrZMRwWXUb82L2K9oYC3vNhlCofc17ov0GyBliLiKl5C21ehTZeQf5A761d52qmm+femceHTQBG0FHZr9flVa1DeWFS6B63ea8RZ51EgSF788XgknP8aHMVdfva11/MJK5qEtsxGu0DJ7xhxEj0KRMmHujnjoGVH1zLgsGK7uY0ndqaivHhUcgRtPI+CerkzalyFrrHA9IBAqPzgzneg2WK8JzRboLUYKOXElW+JKX8Z5Y1HlhJUARr/ihEj49ZhZCjw6SgzNOY7099a5Pxt3gpN+eAo+u8YdpRAazGn63KZf2gxvt/Fo82TUeF+tBOU+rHR/Nck9W1X4EDmDGAfYOVP22ZWnsok9oc1DNmXSdLPi5nzyzzmHJxLyo+zGFE+Fe+t8SgvGW1fjyquIito4kJPh9DS22uBNgP6Bvhx8KfPyDiwjrHrP0SL3kRTZ6Gx09BzC1DWNlRciaxlyFqISipR+WG00+YEpxWhoaM8wfe4V0NtBvn4eOMX0gfJx3gS7yA0MglNWobmZaO3ctDMLJQwC5mi2ytCTkl6sEOBexRVkh4yKkb/D/geSf08VcP3EtwgaXlHHyP3AnxWUmZ7q77bAjWSjrj29kRJvp39DvwXHVKWNlLwEiAAAAAASUVORK5CYII=
 // @match         *://linux.do/*
+// @match         *://cdn.linux.do/*
 // @connect       www.bing.com
 // @require       https://unpkg.com/jquery@3.7.1/dist/jquery.min.js
 // @require       https://unpkg.com/pangu@4.0.7/dist/browser/pangu.js
@@ -66,6 +67,7 @@
 				autoReaderSpeed: "2",
 				autoReaderWait: "3",
 				beautifyLoading: "false",
+				cdnAvatarReplace: "false",
 			};
 
 			for (let key in defaultSettings) {
@@ -1327,6 +1329,10 @@
 											<span>页面 - 美化加载动画<br/><small>更改加载动画圆点为六个</small></span>
 											<input type="checkbox" data-setting="beautifyLoading">
 										</label>
+										<label>
+											<span>功能 - CDN 头像替换<br/><small>将使用 CDN 的图片链接替换为原站，若仍然无法访问，那么将会替换为 OpenAI 风格字符头像</small></span>
+											<input type="checkbox" data-setting="cdnAvatarReplace">
+										</label>
 									</div>
 									<div class="debug" align="center" style="display: none;">
 										<button id="previewDebug" class="btn btn-icon-text" type="button">
@@ -2249,6 +2255,34 @@
 				element.after(japaneseButton)
 			})
 		},
+		cdnAvatarReplace() {
+			base.waitForKeyElements("img", (element) => {
+				let src = element.attr("src");
+				if (src) {
+					try {
+						let url = new URL(src, location.href);
+						if (url.host === "cdn.linux.do" && !/^\/[^/]*$/.test(url.pathname)) {
+							url.host = "linux.do";
+							element.attr("src", url.href);
+							element.on("error", (event) => {
+								let imgElement = event.target;
+								let originalSrc = imgElement.src;
+								try {
+									let usernameMatch = originalSrc.match(/user_avatar\/[^/]+\/([^/]+)\/\d+\/\d+_\d+\.png$/);
+									if (usernameMatch && usernameMatch[1]) {
+										let username = usernameMatch[1];
+										username = username.replace(/[^a-zA-Z0-9]/g, "");
+										let firstTwoChars = username.slice(0, 2).toLowerCase();
+										imgElement.src = `https://cdn.auth0.com/avatars/${firstTwoChars}.png`;
+									}
+								} catch (e) {
+								}
+							});
+						}
+					} catch (e) { }
+				}
+			});
+		},
 	}
 
 	$(document).on('keydown', function (event) {
@@ -2372,6 +2406,9 @@
 			}
 			if (GM_getValue("japaneseEditorButton") === "true") {
 				discourse.japaneseEditorButton();
+			}
+			if (GM_getValue("cdnAvatarReplace") === "true") {
+				discourse.cdnAvatarReplace();
 			}
 		}
 	}
