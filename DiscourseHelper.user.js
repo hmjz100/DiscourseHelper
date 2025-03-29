@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name          Discourse 助手
 // @namespace     github.com/hmjz100
-// @version       1.0.7.4
+// @version       1.0.7.5
 // @author        Hmjz100
 // @description   重构“linuxdo 增强插件”，再次以脚本方式为您呈现！界面更优美，设计更精髓！
 // @license       AGPL-3.0-or-later
@@ -26,12 +26,15 @@
 (function DiscourseHelper() {
 	'use strict';
 
-	if (document.getElementById('challenge-form')) {
-		return;
-	}
+	/*
+	防止代码因其他原因被执行多次
+	这段代码出自 Via轻插件，作者谷花泰
+	*/
+	const key = encodeURIComponent('DiscourseHelper:主代码');
+	if (window[key]) return;
+	window[key] = true;
 
-	let runtimeInfo = GM_info,
-		meaninglessCache = new Map();
+	let runtimeInfo = GM_info, meaninglessCache = new Map();
 
 	// 根基函数
 	let base = {
