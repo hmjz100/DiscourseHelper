@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name          Discourse 助手
 // @namespace     github.com/hmjz100
-// @version       1.0.7.5
+// @version       1.0.7.6
 // @author        Hmjz100
 // @description   重构“linuxdo 增强插件”，再次以脚本方式为您呈现！界面更优美，设计更精髓！
 // @license       AGPL-3.0-or-later
@@ -2254,32 +2254,40 @@
 			})
 		},
 		cdnAvatarReplace() {
+			function errorHandler(event) {
+				let element = event.target;
+				try {
+					let url = new URL(element.src);
+
+					let usernameMatch =
+						url.pathname.match(/user_avatar\/[^/]+\/([^/]+)\/[^/]+\/[^/]+\.[^/]+$/i) ||
+						url.pathname.match(/letter_avatar\/([^/]+)\/[^/]+\/[^/]+\.[^/]+$/i);
+
+					if (usernameMatch && usernameMatch[1]) {
+						let username = usernameMatch[1];
+						username = username.replace(/[^a-zA-Z0-9]/g, "");
+						let firstTwoChars = username.slice(0, 2).toLowerCase();
+
+						element.src = `https://cdn.auth0.com/avatars/${firstTwoChars}.png`;
+						console.warn("Image source replaced with default avatar:", element.src);
+					}
+				} catch (e) {}
+			}
 			base.waitForKeyElements("img", (element) => {
+				if (element.data("checked")) return;
 				let src = element.attr("src");
-				if (src) {
-					try {
-						let url = new URL(src, location.href);
-						if (url.host === "cdn.linux.do" && !/^\/[^/]*$/.test(url.pathname)) {
-							url.host = "linux.do";
-							element.attr("src", url.href);
-							element.on("error", (event) => {
-								let imgElement = event.target;
-								console.warn("error!", imgElement)
-								try {
-									let usernameMatch = url.href.match(/user_avatar\/[^/]+\/([^/]+)\/[^/]+\/[^/]+\.[^/]+$/i) || url.href.match(/letter_avatar\/([^/]+)\/[^/]+\/[^/]+\.[^/]+$/i);
-									console.warn("replace!", imgElement)
-									if (usernameMatch && usernameMatch[1]) {
-										let username = usernameMatch[1];
-										username = username.replace(/[^a-zA-Z0-9]/g, "");
-										let firstTwoChars = username.slice(0, 2).toLowerCase();
-										imgElement.src = `https://cdn.auth0.com/avatars/${firstTwoChars}.png`;
-									}
-								} catch (e) {
-								}
-							});
-						}
-					} catch (e) { }
-				}
+				try {
+					let url = new URL(src, location.href);
+					if (url.host === "cdn.linux.do" && !/^\/[^/]*$/.test(url.pathname)) {
+						url.host = "linux.do";
+						element.attr("src", url.href);
+					}
+					if (element[0].complete && element[0].naturalWidth === 0) {
+						errorHandler({ target: element[0] });
+					}
+					element.off("error", errorHandler).on("error", errorHandler);
+				} catch (e) {}
+				element.data("checked", true);
 			});
 		},
 	}
