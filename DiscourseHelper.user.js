@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name          Discourse 助手
 // @namespace     github.com/hmjz100
-// @version       1.0.7.3
+// @version       1.0.7.4
 // @author        Hmjz100
 // @description   重构“linuxdo 增强插件”，再次以脚本方式为您呈现！界面更优美，设计更精髓！
 // @license       AGPL-3.0-or-later
@@ -1612,11 +1612,13 @@
 
 					.folded-post.row{display:flex;flex-direction:row}
 					.mobile-view .folded-post.row{display:block;border-top:1px solid var(--primary-low)}
-					.mobile-view .topic-post.regular:has(.folded-post.row:not([style*="display: none"])) {position: relative}
+					.mobile-view .topic-post.regular:has(.folded-post.row:not([style*="display: none"])) {position:relative}
+					.mobile-view .topic-post.regular:has(.folded-post.row:not([style*="display: none"])) > *:not(.folded-post.row) {position:absolute;top:1px;left:1px}
 					.folded-post .topic-avatar,.folded-post .topic-body{padding-top:10px}
 					.folded-post .topic-body .cooked{padding:0 var(--topic-body-width-padding) 10px}
 					.folded-post .topic-body .cooked > *{padding:0;margin:0}
 					.mobile-view .folded-post .topic-body .cooked{padding:0 0 10px}
+
 
 					#floating-nav{position:fixed;bottom:50px;right:20px;display:flex;flex-direction:column;align-items:center;gap:13px;z-index:1000}
 					.floating-button,.biliButton{background-color:var(--tertiary);color:#fff;cursor:pointer;border:none;padding:0;transition:background-color 0.2s,box-shadow 0.2s,opacity 0.2s;display:flex;align-items:center;justify-content:center;border-radius:4px}
@@ -1916,9 +1918,6 @@
 						"height": "",
 						"width": "",
 						"opacity": "",
-						"position": "",
-						"top": "",
-						"left": "",
 						"pointer-events": "",
 					});
 				});
@@ -1933,9 +1932,6 @@
 						"height": "0",
 						"width": "0",
 						"opacity": "0",
-						"position": "absolute",
-						"top": "1px",
-						"left": "1px",
 						"pointer-events": "none",
 					});
 				});
@@ -1949,9 +1945,6 @@
 					"height": "0",
 					"width": "0",
 					"opacity": "0",
-					"position": "absolute",
-					"top": "1px",
-					"left": "1px",
 					"pointer-events": "none",
 				});
 			});
@@ -2061,6 +2054,8 @@
 							backdrop-filter: blur(10px);
 							-webkit-backdrop-filter: blur(10px);
 						}
+						mobile-view body,
+						.user-main .about .details,
 						.sidebar-wrapper,
 						.sidebar-footer-wrapper,
 						.sidebar-footer-wrapper .sidebar-footer-container::before,
@@ -2266,9 +2261,10 @@
 							element.attr("src", url.href);
 							element.on("error", (event) => {
 								let imgElement = event.target;
-								let originalSrc = imgElement.src;
+								console.warn("error!", imgElement)
 								try {
-									let usernameMatch = originalSrc.match(/user_avatar\/[^/]+\/([^/]+)\/\d+\/\d+_\d+\.(png|jpg|jpeg|gif|webp)$/i);
+									let usernameMatch = url.href.match(/user_avatar\/[^/]+\/([^/]+)\/[^/]+\/[^/]+\.[^/]+$/i) || url.href.match(/letter_avatar\/([^/]+)\/[^/]+\/[^/]+\.[^/]+$/i);
+									console.warn("replace!", imgElement)
 									if (usernameMatch && usernameMatch[1]) {
 										let username = usernameMatch[1];
 										username = username.replace(/[^a-zA-Z0-9]/g, "");
