@@ -2268,7 +2268,7 @@
 								let imgElement = event.target;
 								let originalSrc = imgElement.src;
 								try {
-									let usernameMatch = originalSrc.match(/user_avatar\/[^/]+\/([^/]+)\/\d+\/\d+_\d+\.png$/);
+									let usernameMatch = originalSrc.match(/user_avatar\/[^/]+\/([^/]+)\/\d+\/\d+_\d+\.(png|jpg|jpeg|gif|webp)$/i);
 									if (usernameMatch && usernameMatch[1]) {
 										let username = usernameMatch[1];
 										username = username.replace(/[^a-zA-Z0-9]/g, "");
