@@ -3130,7 +3130,7 @@
 			if (GM_getValue("cdnAvatarReplace") === "true") {
 				discourse.cdnAvatarReplace();
 			}
-			discourse.editor.customEmojiButton();
+			//discourse.editor.customEmojiButton();
 		}
 	}
 	main.init();
