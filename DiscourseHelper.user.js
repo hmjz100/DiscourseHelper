@@ -50,7 +50,7 @@
 				foldUselessReply: "true",
 				foldUselessReplyOpacity: "true",
 				replaceEmoji: "noto",
-				replaceTheme: "true",
+				replaceTheme: "custom",
 				replaceBackground: "bing",
 				replaceFont: "true",
 				replaceFontName: "MiSans",
