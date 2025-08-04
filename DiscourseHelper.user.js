@@ -1,7 +1,7 @@
-// ==UserScript==
+﻿// ==UserScript==
 // @name          Discourse 助手
 // @namespace     github.com/hmjz100
-// @version       1.0.7.9
+// @version       1.0.8
 // @author        Hmjz100
 // @description   重构“linuxdo 增强插件”，再次以脚本方式为您呈现！界面更优美，设计更精髓！
 // @license       AGPL-3.0-or-later
@@ -14,25 +14,22 @@
 // @require       https://unpkg.com/marked@15.0.7/marked.min.js
 // @require       https://unpkg.com/katex@0.16.21/dist/katex.min.js
 // @grant         GM_xmlhttpRequest
-// @grant         GM.xmlhttpRequest
 // @grant         GM_getValue
 // @grant         GM_setValue
-// @grant         GM_info
 // @run-at        document-start
 // ==/UserScript==
 
 (function DiscourseHelper() {
 	// 严格模式，确保代码安全执行，不越界
 	'use strict';
-
 	/*
 	防止代码因其他原因被执行多次
 	代码出自 “Via 轻插件”，作者谷花泰
 	*/
-	let key = encodeURIComponent('LinkSwift:主代码');
+	let key = encodeURIComponent('DiscourseHelper:主代码');
 	if (window[key]) return;
 	window[key] = true;
-
+	/* 全局参数 */
 	let mount = idontknow("DiscourseHelper")
 	let runtimeInfo = GM_info, meaninglessCache = new Map();
 
@@ -53,9 +50,9 @@
 				foldUselessReply: "true",
 				foldUselessReplyOpacity: "true",
 				replaceEmoji: "noto",
-				replaceTheme: "false",
+				replaceTheme: "true",
 				replaceBackground: "bing",
-				replaceFont: "false",
+				replaceFont: "true",
 				replaceFontName: "MiSans",
 				replaceFontStyle: "https://unpkg.com/misans@4.0.0/lib/Normal/MiSans-Medium.min.css",
 				optimizeBiliPlayer: "true",
@@ -71,7 +68,6 @@
 				autoReaderSpeed: "2",
 				autoReaderWait: "3",
 				beautifyLoading: "false",
-				cdnAvatarReplace: "false",
 			};
 
 			for (let key in defaultSettings) {
@@ -79,6 +75,149 @@
 					GM_setValue(key, defaultSettings[key].toString());
 				}
 			}
+		},
+		xmlHttpRequest(option) {
+			let request = (typeof GM_xmlhttpRequest !== "undefined") ? GM_xmlhttpRequest : GM.xmlHttpRequest;
+			if (request && typeof request === 'function') {
+				return request(option);
+			}
+		},
+		get(url, headers, type, extra, maxRetries = 3, currentRetry = 0) {
+			return new Promise((resolve, reject) => {
+				let sendRequest = function () {
+					let requestObj = base.xmlHttpRequest({
+						method: "GET", url, headers,
+						responseType: type || 'json',
+						onload: function (res) {
+							if (res.status === 204) {
+								console.log('【DiscourseHelper】Get(load)\n\x1B[31m该请求已被某个下载工具捕获。' + (res.statusText ? ("\n\x1B[0m工具提示：\x1B[31m" + res.statusText) : "") + '\x1B[0m\n请求地址：' + url + '\n请求头部：', headers, '\n请求结果：', res);
+								requestObj.abort();
+								return;
+							}
+							if (type === 'blob') {
+								console.log('【DiscourseHelper】Get(load) Blob\n请求地址：' + url + '\n请求头部：', headers, '\n请求结果：', res);
+								res.status === 200 && base.blobDownload(res.response, extra.filename);
+								resolve(res);
+							} else {
+								console.log('【DiscourseHelper】Get(load)\n请求地址：' + url + '\n请求头部：', headers, '\n请求结果：', res);
+								resolve(res.response || res.responseText);
+							}
+						},
+						onerror: function (err) {
+							if (currentRetry < maxRetries) {
+								currentRetry++;
+								console.error(`【DiscourseHelper】Get(error)\n请求出现错误，可能是网络问题\n5秒后将重试 (错误次数：${currentRetry}/${maxRetries})...`, err);
+								setTimeout(function () {
+									console.log(`【DiscourseHelper】Get(error)\n重新尝试请求...`);
+									sendRequest();
+								}, 5000)
+							} else {
+								reject('【DiscourseHelper】Get(error)\n请求出现错误，可能是网络问题\n无法继续请求，达到最大错误次数。', err);
+							}
+						},
+					});
+				};
+
+				sendRequest(); // 初始请求
+			});
+		},
+		getFullLink(link) {
+			return new URL(link, location.href).href;
+		},
+		/**
+		 * 等待指定元素加载完成并执行回调
+		 * @author hmjz100
+		 * @description 监听 DOM 元素是否出现，若未出现则每隔一段时间重试，直到找到为止。
+		 * 支持在 iframe 内部查找元素，适用于异步加载场景。
+		 * @param {string} selectorElem - 要等待的目标元素选择器
+		 * @param {Function} actionFunction - 找到元素后执行的回调函数，接收 jQuery 元素作为参数，返回 true 可以不再继续寻找
+		 * @param {boolean} [bWaitOnce=false] - 是否只执行一次回调，默认为 false，如果不设置为 true 的话需要自行判断是否对元素进行操作
+		 * @param {string} [iframeSelector] - 若目标元素位于 iframe 中，传入 iframe 的选择器
+		 * @param {string} [controlKey] - 控制唯一性的键名，用于避免重复处理
+		 */
+		waitForKeyElements(selectorElem, actionFunction, bWaitOnce, iframeSelector, controlKey) {
+			// 初始化管理器
+			const manager = this.waitForKeyElements.manager || (
+				this.waitForKeyElements.manager = {
+					observers: new WeakMap(),
+					tasks: new Map(),
+					instanceCounter: 0
+				}
+			);
+			const targetDoc = iframeSelector ? $(iframeSelector).get(0)?.contentDocument : document;
+			if (!targetDoc) return; // 无效文档直接返回
+			// 生成唯一控制键
+			controlKey = controlKey || `wkfe_${manager.instanceCounter++}`;
+			// 清理重复任务
+			const existingTask = manager.tasks.get(controlKey);
+			if (existingTask) {
+				existingTask.observer.disconnect();
+				manager.tasks.delete(controlKey);
+			}
+			// 创建MutationObserver回调
+			const processElements = () => {
+				const elements = $(selectorElem, targetDoc);
+				let foundActive = false;
+				elements.each((i, el) => {
+					const jEl = $(el);
+					const isProcessed = jEl.data(controlKey);
+					if (isProcessed) return true; // 跳过已处理元素
+					const cancelAction = actionFunction(jEl);
+					if (cancelAction) {
+						foundActive = true;
+					} else if (bWaitOnce) {
+						jEl.data(controlKey, true); // 标记已处理
+					}
+				});
+				// 一次性任务且找到有效元素时清理
+				if (bWaitOnce && foundActive) {
+					observer.disconnect();
+					manager.tasks.delete(controlKey);
+				}
+			};
+			// 创建Observer实例
+			const observer = new MutationObserver(processElements);
+			// 配置并启动观察
+			observer.observe(targetDoc.documentElement, {
+				childList: true,
+				subtree: true,
+				attributes: true,
+				characterData: true
+			});
+			// 注册任务
+			manager.tasks.set(controlKey, {
+				observer,
+				targetDoc
+			});
+			// 立即执行初始检查
+			processElements();
+		},
+		showToast(htmlContent, duration = 1500) {
+			let allToasts = $('.helper-toast');
+			let totalToasts = allToasts.length;
+			if (totalToasts > 2) {
+				for (let i = 0; i < totalToasts - 2; i++) {
+					$(allToasts[i]).removeClass('show').on('transitionend', () => {
+						$(allToasts[i]).remove();
+					});
+				}
+			}
+			/**
+			 * 显示一个 Toast 提示
+			 * @param {string} htmlContent - 自定义的 HTML 内容
+			 * @param {number} duration - 持续时间（毫秒）
+			 */
+			let toast = $('<div>', {
+				class: 'helper-toast',
+				html: htmlContent
+			});
+
+			$('body').append(toast);
+			setTimeout(() => toast.addClass('show'), 10);
+
+			setTimeout(() => {
+				toast.removeClass('show').on('transitionend', () => { toast.remove() });
+			}, duration);
 		},
 		displaySettings() {
 			let timer = null
@@ -93,7 +232,7 @@
 					#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-body{max-height:none;max-width:none;margin:0;width:calc(100% - 2em)}
 					#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-body label{display:flex;justify-content:space-between;padding:10px;align-items:center;text-align:left;transition:background 0.2s ease}
 					#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-body label.button{cursor:pointer;user-select:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none}
-					#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-body label:hover{background:rgba(var(--primary-rgb), 0.1)}
+					#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-body label:hover{background:rgba(var(--primary-rgb, var(--none-black-rgb)), 0.1)}
 					#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-body .controls select,
 					#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-body .controls textarea,
 					#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-body .controls input[type="text"],
@@ -198,7 +337,6 @@
 									<option value="huggingface">HuggingFace 社区 (discuss.huggingface.co)</option>
 									<option value="ubuntu">Ubuntu 社区 (discourse.ubuntu.com)</option>
 									<option value="googleaidevs">Google AI 开发者社区 (discuss.ai.google.dev)</option>
-									<option value="googleaidevs_old">Google AI 开发者社区旧版 (discuss.ai.google.dev)</option>
 									<option value="unity">Unity 社区 (discussions.unity.com)</option>
 									<option value="godot">Godot 社区 (forum.godotengine.org)</option>
 									<option value="ksec">KSEC 安全社区 (forum.ksec.co.uk)</option>
@@ -209,11 +347,11 @@
 								<input type="text" data-parent-setting="replaceTheme,custom" data-setting="replaceBackground">
 							</label>
 							<label>
-								<span>页面 - 优化哔哩内嵌<br/><small>关闭自动播放，隐藏推荐视频</small></span>
+								<span>页面 - 优化哔哩内嵌<br/><small>关闭自动播放，隐藏推荐视频；识别替换 OneBox 链接为内嵌视频</small></span>
 								<input type="checkbox" data-setting="optimizeBiliPlayer">
 							</label>
 							<label>
-								<span>功能 - 优化哔哩内嵌 - 替换为移动版播放器<br/><small>播放器更精简，支持触控/字幕，添加跳转原视频按钮<br/>点击播放器还不会跳转到视频页面</small></span>
+								<span>功能 - 优化哔哩内嵌 - 替换为移动版播放器<br/><small>播放器更精简，支持触控/字幕，添加跳转原视频按钮<br/>点击内嵌不会跳到视频页面</small></span>
 								<input type="checkbox" data-parent-setting="optimizeBiliPlayer,true" data-setting="optimizeBiliPlayerMobile">
 							</label>
 							<label>
@@ -284,10 +422,6 @@
 							<label>
 								<span><svg class="fa d-icon svg-icon svg-string" xmlns="http://www.w3.org/2000/svg"><use href="#flask"></use></svg> 页面 - 美化加载动画<br/><small>更改加载动画圆点为六个</small></span>
 								<input type="checkbox" data-setting="beautifyLoading">
-							</label>
-							<label>
-								<span><svg class="fa d-icon svg-icon svg-string" xmlns="http://www.w3.org/2000/svg"><use href="#flask"></use></svg> 功能 - CDN 头像替换<br/><small>将使用 CDN 的头像链接替换为原站链接<br/>若仍然无法访问，那么将会替换为 OpenAI 风格字符头像</small></span>
-								<input type="checkbox" data-setting="cdnAvatarReplace">
 							</label>
 						</div>
 						<div class="debug" align="center" style="display: none;">
@@ -413,23 +547,16 @@
 				previewWindow.document.close();
 			});
 			helperSettings.find("#previewDebug").on("click", (event) => {
-				base.showToast("进入预览模式！通知类元素将被删除！数字类数据将被替换！");
-				setInterval(() => {
-					$("[href='#circle']").each(function () {
-						$(this).parent().remove()
-					})
-					$(".chat-channel-unread-indicator, .show-more.has-topics, .topic-post-badges").each(function () {
-						$(this).remove()
-					})
-					$(".nav-item_new > a").text("新")
-					$(".nav-item_unread > a").text("未读")
-					$(".heatmap-high").text("/").removeClass("heatmap-high")
-					$(".heatmap-med").text("/").removeClass("heatmap-med")
-					$(".topic-list-data.age").text("/")
-					$(".num:not(.sortable)").text("/")
-				}, 1000)
-				if (timer) clearInterval(timer)
-				helperSettings.remove()
+				base.showToast("进入预览模式！通知类元素将被删除！数字类数据将被替换！如需关闭请刷新", 3000);
+				helperSettings.remove();
+				base.waitForKeyElements("[href='#circle']", (tag) => tag.parent().remove(), true);
+				base.waitForKeyElements(".chat-channel-unread-indicator, .show-more.has-topics, .topic-post-badges", (tag) => tag.remove(), true);
+				base.waitForKeyElements(".nav-item_new > a", (tag) => tag.text("新"), true);
+				base.waitForKeyElements(".nav-item_unread > a", (tag) => tag.text("未读"), true);
+				base.waitForKeyElements(".heatmap-high", (tag) => tag.text("/").removeClass("heatmap-high"), true);
+				base.waitForKeyElements(".heatmap-med", (tag) => tag.text("/").removeClass("heatmap-med"), true);
+				base.waitForKeyElements(".topic-list-data.age, .num:not(.sortable)", (tag) => tag.text("/"), true);
+				if (timer) clearInterval(timer);
 			})
 
 			function checkParentSettings() {
@@ -512,141 +639,6 @@
 				helperSettings.find(".dialog-content .dialog-header > .date").text(base.formatDate(Date.now()))
 			}, 500)
 			$(`html > .${mount}`).append(helperSettings)
-		},
-		xmlHttpRequest(option) {
-			let request = (typeof GM_xmlhttpRequest !== "undefined") ? GM_xmlhttpRequest : GM.xmlHttpRequest;
-			if (request && typeof request === 'function') {
-				return request(option);
-			}
-		},
-		get(url, headers, type, extra, maxRetries = 3, currentRetry = 0) {
-			return new Promise((resolve, reject) => {
-				let sendRequest = function () {
-					let requestObj = base.xmlHttpRequest({
-						method: "GET", url, headers,
-						responseType: type || 'json',
-						onload: function (res) {
-							if (res.status === 204) {
-								console.log('【DiscourseHelper】Get(load)\n\x1B[31m该请求已被某个下载工具捕获。' + (res.statusText ? ("\n\x1B[0m工具提示：\x1B[31m" + res.statusText) : "") + '\x1B[0m\n请求地址：' + url + '\n请求头部：', headers, '\n请求结果：', res);
-								requestObj.abort();
-								return;
-							}
-							if (type === 'blob') {
-								console.log('【DiscourseHelper】Get(load) Blob\n请求地址：' + url + '\n请求头部：', headers, '\n请求结果：', res);
-								res.status === 200 && base.blobDownload(res.response, extra.filename);
-								resolve(res);
-							} else {
-								if (res.response) {
-									try {
-										res.decodedResponse = JSON.parse(res.response);
-									} catch (e) { }
-									try {
-										res.decodedResponse = JSON.parse(base.decode(res.response));
-									} catch (e) { }
-								}
-								if (res.responseText) {
-									try {
-										res.decodedResponseText = JSON.stringify(JSON.parse(res.responseText));
-									} catch (e) { }
-									try {
-										res.decodedResponseText = JSON.stringify(base.decode(res.responseText));
-									} catch (e) { }
-								}
-								console.log('【DiscourseHelper】Get(load)\n请求地址：' + url + '\n请求头部：', headers, '\n请求结果：', res);
-								resolve(res.response || res.responseText);
-							}
-						},
-						onerror: function (err) {
-							if (currentRetry < maxRetries) {
-								currentRetry++;
-								console.error(`【DiscourseHelper】Get(error)\n请求出现错误，可能是网络问题\n5秒后将重试 (错误次数：${currentRetry}/${maxRetries})...`, err);
-								setTimeout(function () {
-									console.log(`【DiscourseHelper】Get(error)\n重新尝试请求...`);
-									sendRequest();
-								}, 5000)
-							} else {
-								reject('【DiscourseHelper】Get(error)\n请求出现错误，可能是网络问题\n无法继续请求，达到最大错误次数。', err);
-							}
-						},
-					});
-				};
-
-				sendRequest(); // 初始请求
-			});
-		},
-		getFullLink(link) {
-			return new URL(link, location.href).href;
-		},
-		waitForKeyElements(selectorTxt, actionFunction, bWaitOnce, iframeSelector) {
-			var targetNodes, btargetsFound;
-
-			if (typeof iframeSelector == "undefined")
-				targetNodes = $(selectorTxt);
-			else
-				targetNodes = $(iframeSelector).contents().find(selectorTxt);
-
-			if (targetNodes && targetNodes.length > 0) {
-				btargetsFound = true;
-				targetNodes.each(function () {
-					var jThis = $(this);
-					var alreadyFound = jThis.data('alreadyFound') || false;
-
-					if (!alreadyFound) {
-						var cancelFound = actionFunction(jThis);
-						if (cancelFound)
-							btargetsFound = false;
-						else {
-							jThis.data('alreadyFound');
-						}
-					}
-				});
-			} else {
-				btargetsFound = false;
-			}
-
-			var controlObj = base.waitForKeyElements.controlObj || {};
-			var controlKey = selectorTxt.replace(/[^\w]/g, "_") + actionFunction.toString().replace(/[^\w]/g, "_");
-			var timeControl = controlObj[controlKey];
-
-			if (btargetsFound && bWaitOnce && timeControl) {
-				clearInterval(timeControl);
-				delete controlObj[controlKey]
-			} else {
-				if (!timeControl) {
-					timeControl = setInterval(() => {
-						base.waitForKeyElements(selectorTxt, actionFunction, bWaitOnce, iframeSelector);
-					}, 1000);
-					controlObj[controlKey] = timeControl;
-				}
-			}
-			base.waitForKeyElements.controlObj = controlObj;
-		},
-		showToast(htmlContent, duration = 1500) {
-			let allToasts = $('.helper-toast');
-			let totalToasts = allToasts.length;
-			if (totalToasts > 2) {
-				for (let i = 0; i < totalToasts - 2; i++) {
-					$(allToasts[i]).removeClass('show').on('transitionend', () => {
-						$(allToasts[i]).remove();
-					});
-				}
-			}
-			/**
-			 * 显示一个 Toast 提示
-			 * @param {string} htmlContent - 自定义的 HTML 内容
-			 * @param {number} duration - 持续时间（毫秒）
-			 */
-			let toast = $('<div>', {
-				class: 'helper-toast',
-				html: htmlContent
-			});
-
-			$('body').append(toast);
-			setTimeout(() => toast.addClass('show'), 10);
-
-			setTimeout(() => {
-				toast.removeClass('show').on('transitionend', () => { toast.remove() });
-			}, duration);
 		},
 		previewTopic(id) {
 			let preViewer = `<div id="dialog-holder" class="dialog-container">
@@ -1069,42 +1061,6 @@
 				`,
 			},
 			{
-				label: "googleaidevs_old",
-				content: `
-				<link class="themeFix" href="https://unpkg.com/material-symbols@0.29.0/index.css" media="all" rel="stylesheet" />
-				<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/color_definitions_google-ai-for-developers_8_2_a146065001d103c6f508d0aecd9795e2b85e0231.css" media="all" rel="stylesheet" class="light-scheme">
-				<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/desktop_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="desktop">
-				<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/checklist_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="checklist">
-				<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/discourse-ai_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="discourse-ai">
-				<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/discourse-akismet_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="discourse-akismet">
-				<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/discourse-cakeday_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="discourse-cakeday">
-				<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/discourse-data-explorer_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="discourse-data-explorer">
-				<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/discourse-details_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="discourse-details">
-				<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/discourse-lazy-videos_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="discourse-lazy-videos">
-				<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/discourse-local-dates_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="discourse-local-dates">
-				<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/discourse-narrative-bot_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="discourse-narrative-bot">
-				<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/discourse-policy_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="discourse-policy">
-				<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/discourse-presence_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="discourse-presence">
-				<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/discourse-reactions_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="discourse-reactions">
-				<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/discourse-solved_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="discourse-solved">
-				<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/discourse-templates_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="discourse-templates">
-				<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/discourse-topic-voting_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="discourse-topic-voting">
-				<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/footnote_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="footnote">
-				<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/hosted-site_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="hosted-site">
-				<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/poll_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="poll">
-				<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/spoiler-alert_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="spoiler-alert">
-				<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/discourse-ai_desktop_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="discourse-ai_desktop">
-				<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/discourse-reactions_desktop_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="discourse-reactions_desktop">
-				<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/discourse-topic-voting_desktop_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="discourse-topic-voting_desktop">
-				<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/poll_desktop_512b34b3c789d4724f7cb6afc7f9dbb5bdcf63bc.css" media="all" rel="stylesheet" data-target="poll_desktop">
-				<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/desktop_theme_4_89b44c1aa4a914829f5dab76be36f050017112fd.css" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="4" data-theme-name="discourse header search">
-				<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/desktop_theme_3_a8a980bc06c18d3fc858c318921f96f6581459cf.css" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="3" data-theme-name="discourse-material-icons">
-				<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/desktop_theme_9_ad782db09c6a21e86f43e7f9fbbaa30324037bf5.css" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="9" data-theme-name="global notice custom css">
-				<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/desktop_theme_8_878e84961d78833adf9238d6eda91eb9292d7ed3.css" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="8" data-theme-name="temp nav fixes">
-				<link href="https://yyz1.discourse-cdn.com/googleaitrial/stylesheets/desktop_theme_2_c35f48dbd27cfaac6e78670aa85b8a0bd9a462fa.css" media="all" rel="stylesheet" data-target="desktop_theme" data-theme-id="2" data-theme-name="google ai">
-				`,
-			},
-			{
 				label: "unity",
 				content: `
 				<link href="https://dub2.discourse-cdn.com/unity/stylesheets/color_definitions_unity-light-scheme_9_10_4c0f3200fa1f4e23d3c58e1203db22882c615fd1.css?__ws=discussions.unity.com" media="(prefers-color-scheme: light)" rel="stylesheet" class="light-scheme" />
@@ -1419,7 +1375,7 @@
 	}, true)
 
 	// 功能函数
-	let discourse = {
+	let functions = {
 		addMenu() {
 			base.waitForKeyElements(`html > .${mount}`, (element) => {
 				if ($("#discourseHelper").length > 0) return;
@@ -1606,6 +1562,12 @@
 					</style>`)
 				}
 				element.append(`<style id="discourseHelper-Style">
+					:root {
+						--none-black: #000000;
+						--none-black-rgb: 0,0,0;
+						--none-white: #000000;
+						--none-white-rgb: 255,255,255;
+					}
 					html:has(#dialog-holder:not([aria-hidden="true"]) .dialog-content .dialog-body){overflow:hidden}
 					.dialog-container:not(:last-of-type):has(~ .dialog-container) {display:none!important}
 					.post-info.floor{color:var(--primary-med-or-secondary-med);margin-left:1em;font-family:Consolas,Monaco,'Lucida Console','Liberation Mono','DejaVu Sans Mono','Bitstream Vera Sans Mono','Courier New',monospace}
@@ -1714,10 +1676,10 @@
 						} else if (timeDiff < 1e3 * 60 * 60 * 24 * 30) { // 小于30天
 							return rtf.format(-Math.floor(timeDiff / (1e3 * 60 * 60 * 24)), "day");
 						} else if (timeDiff < 1e3 * 60 * 60 * 24 * 365) { // 小于一年
-							element.prepend(`<div class="post-activity"><img style="width:20px;vertical-align:middle;" src="https://cdn.ldstatic.com/original/4X/4/0/8/408c29a1d1dfaada3160fb2ae366cf3a7c7c1696.png"></div>`);
+							element.prepend(`<div class="post-activity"><img style="width:20px;vertical-align:middle;" src="https://linux.do/uploads/default/original/4X/4/0/8/408c29a1d1dfaada3160fb2ae366cf3a7c7c1696.png"></div>`);
 							return rtf.format(-Math.floor(timeDiff / (1e3 * 60 * 60 * 24 * 30)), "month");
 						} else { // 超过一年
-							element.prepend(`<div class="post-activity"><img style="width:20px;vertical-align:middle;" src="https://cdn.ldstatic.com/original/4X/4/0/8/408c29a1d1dfaada3160fb2ae366cf3a7c7c1696.png"></div>`);
+							element.prepend(`<div class="post-activity"><img style="width:20px;vertical-align:middle;" src="https://linux.do/uploads/default/original/4X/4/0/8/408c29a1d1dfaada3160fb2ae366cf3a7c7c1696.png"></div>`);
 							return rtf.format(-Math.floor(timeDiff / (1e3 * 60 * 60 * 24 * 365)), "year");
 						}
 					};
@@ -1783,7 +1745,7 @@
 				element.replaceWith(elemclone);
 			});
 		},
-		topicPreviewer() {
+		addTopicPreview() {
 			let preButton = `<a title="预览" class="topic-status previewTopic">
 				<svg class="fa d-icon svg-icon svg-string" xmlns="http://www.w3.org/2000/svg">
 					<use href="#eye"></use>
@@ -2082,28 +2044,34 @@
 				}
 				base.waitForKeyElements(`html > .${mount}:not(:has(#customBg))`, (element) => {
 					element.append(`<style id="customBg">
-						html {
+						html:not(:has(.acontainer)) {
 							background-image: url("${custom.replace(/(["'\\])/g, "\\$1")}");
 							background-position: center center;
 							background-attachment: fixed;
 							background-size: cover;
 							position: relative;
 						}
-						html::before {
+						html:not(:has(.acontainer))::before {
 							content: "";
 							position: fixed;
 							top: 0;
 							left: 0;
 							width: 100%;
 							height: 100%;
-							background-color: rgba(var(--secondary-rgb), 0.9);
+							background-color: rgba(var(--secondary-rgb, var(--none-white-rgb)), 0.9);
 							z-index: -9999;
 							pointer-events: none;
 						}
 						.d-header {
-							background-color: rgba(var(--secondary-rgb), 0.6);
+							background-color: rgba(var(--secondary-rgb, var(--none-black-rgb)), 0.6);
+						}
+						.d-header,
+						html > body > .acontainer {
 							backdrop-filter: blur(10px);
 							-webkit-backdrop-filter: blur(10px);
+						}
+						.menu-panel {
+							background-color: rgba(var(--secondary-rgb, var(--none-black-rgb)), 0.9);
 						}
 						mobile-view body,
 						.user-main .about .details,
@@ -2112,11 +2080,13 @@
 						.sidebar-footer-wrapper,
 						.sidebar-footer-wrapper .sidebar-footer-container::before,
 						.user-content,
-						.post-list .post-list-item {
+						.topic-list-item,
+						.topic-list-item.visited .topic-list-data, .latest-topic-list-item.visited, .category-topic-link.visited,
+						.post-list-item {
 							background: transparent !important;
 						}
 						aside.onebox {
-							background-color: rgba(var(--secondary-rgb), 0.6) !important;
+							background-color: rgba(var(--secondary-rgb, var(--none-black-rgb)), 0.6) !important;
 							backdrop-filter: blur(10px);
 							-webkit-backdrop-filter: blur(10px);
 						}
@@ -2125,11 +2095,33 @@
 			}
 		},
 		optimizeBiliPlayer() {
+			base.waitForKeyElements("aside.onebox", (element) => {
+				if (element.data("checked")) return;
+				let url = element.attr("data-onebox-src");
+				try { url = new URL(url, location.href) } catch { return }
+				if (!url.host.includes("bilibili.com")) return;
+				let getVideoId = () => {
+					let pathMatch = url.pathname.match(/(av\d+|BV\w+)/);
+					return pathMatch ? pathMatch[0] : null;
+				};
+				let videoId = getVideoId();
+				if (!videoId) return;
+				let isAV = videoId.startsWith("av");
+				try { url = new URL("//player.bilibili.com/player.html", location.href) } catch { return }
+				if (isAV) url.searchParams.set("aid", videoId.replace("av", ""))
+				else url.searchParams.set("bvid", videoId)
+				element.replaceWith($('<iframe>').attr({
+					"src": url.href,
+					"frameborder": "no",
+					"allowfullscreen": "true",
+					"referrerpolicy": "no-referrer"
+				}));
+			})
 			base.waitForKeyElements("iframe", (element) => {
 				if (element.data("checked")) return;
 				let elemclone = element.clone();
 				let url = element.attr("src");
-				try { url = new URL(url, location.href) } catch (e) { return }
+				try { url = new URL(url, location.href) } catch { return }
 				if (url.host !== "player.bilibili.com") return;
 				let params = url.searchParams;
 
@@ -2187,7 +2179,8 @@
 					elemclone.data("checked", true);
 					element.replaceWith($('<div>').css({
 						position: 'relative',
-						display: 'inline-block'
+						display: 'inline-block',
+						width: '100%'
 					}).append(elemclone, jumpBtn));
 					return;
 				}
@@ -2315,60 +2308,6 @@
 				})
 			},
 		},
-		cdnAvatarReplace() {
-			function errorHandler(event) {
-				let element = event.target;
-				try {
-					let url = new URL(element.src);
-
-					let usernameMatch =
-						url.pathname.match(/user_avatar\/[^/]+\/([^/]+)\/[^/]+\/[^/]+\.[^/]+$/i) ||
-						url.pathname.match(/letter_avatar\/([^/]+)\/[^/]+\/[^/]+\.[^/]+$/i);
-
-					if (usernameMatch && usernameMatch[1]) {
-						let username = usernameMatch[1];
-						username = username.replace(/[^a-zA-Z0-9]/g, "");
-						let firstTwoChars = username.slice(0, 2).toLowerCase();
-						let auth0URL = `https://cdn.auth0.com/avatars/${firstTwoChars}.png`;
-
-						element.src = auth0URL;
-						let observer = new MutationObserver((mutationsList) => {
-							for (let mutation of mutationsList) {
-								if (mutation.type === 'attributes' && mutation.attributeName === 'src') {
-									if (element.src !== auth0URL) {
-										element.src = auth0URL;
-									}
-								}
-							}
-						});
-						observer.observe(element, {
-							attributes: true,
-							attributeFilter: ['src']
-						});
-					}
-				} catch (e) { }
-			}
-			base.waitForKeyElements("img", (element) => {
-				if (element.data("checked")) return;
-				let src = element.attr("src");
-				try {
-					let url = new URL(src, location.href);
-					if (url.host === "cdn.linux.do" && !/^\/[^/]*$/.test(url.pathname)) {
-						url.host = "linux.do";
-						element.attr("src", url.href);
-					} else if (url.pathname.startsWith("/uploads/default/original")) {
-						url.host = "cdn.ldstatic.com";
-						url.pathname = url.pathname.replace("/uploads/default", "");
-						element.attr("src", url.href);
-					}
-					if (element[0].complete && element[0].naturalWidth === 0) {
-						errorHandler({ target: element[0] });
-					}
-					element.off("error", errorHandler).on("error", errorHandler);
-				} catch (e) { }
-				element.data("checked", true);
-			});
-		},
 	}
 
 	$(document).on('keydown', function (event) {
@@ -2386,8 +2325,8 @@
 		async init() {
 			base.initDefaultConfig();
 
-			discourse.addStyle();
-			discourse.addMenu();
+			functions.addStyle();
+			functions.addMenu();
 
 			if (GM_getValue("beautifyLoading") === "true") {
 				let refreshAnimation = $(`<div id="dialog-holder" class="discourseLoading dialog-container">
@@ -2440,73 +2379,70 @@
 					refreshAnimation.find("#loading").html("加载中...")
 					$("html").append(refreshAnimation);
 				});
-				base.waitForKeyElements(`section.ember-application#main`, () => {
+				base.waitForKeyElements(`section.ember-application#main, .acontainer`, () => {
 					refreshAnimation.remove();
 				}, true)
 			}
 
 			if (GM_getValue("addNaviStateTab") === "true") {
-				discourse.addNaviStateTab();
+				functions.addNaviStateTab();
 			}
 			if (GM_getValue("hideRepliesColumn") === "true") {
-				discourse.hideRepliesColumn();
+				functions.hideRepliesColumn();
 			}
 			if (GM_getValue("hideViewsColumn") === "true") {
-				discourse.hideViewsColumn();
+				functions.hideViewsColumn();
 			}
 			if (GM_getValue("hideActivityColumn") === "true") {
-				discourse.hideActivityColumn();
+				functions.hideActivityColumn();
 			}
 			if (GM_getValue("showTopicCreatedTime") === "true" && GM_getValue("hideActivityColumn") !== "true") {
-				discourse.showTopicCreatedTime();
+				functions.showTopicCreatedTime();
 			}
 			if (GM_getValue("topicNewTab") === "true") {
-				discourse.topicNewTab();
+				functions.topicNewTab();
 			}
 			if (GM_getValue("previewTopic") === "true") {
-				discourse.topicPreviewer();
+				functions.addTopicPreview();
 			}
 			if (GM_getValue("topicFloorIndicator") === "true") {
-				discourse.topicFloorIndicator();
+				functions.topicFloorIndicator();
 			}
 			if (GM_getValue("autoHeight") === "true") {
-				discourse.autoHeight();
+				functions.autoHeight();
 			}
 			if (GM_getValue("expandReply") === "true") {
-				discourse.expandReply();
+				functions.expandReply();
 			}
 			if (GM_getValue("foldUselessReply") === "true") {
-				discourse.foldUselessReply();
+				functions.foldUselessReply();
 			}
 			if (GM_getValue("foldUselessReply") === "true" && GM_getValue("foldUselessReplyOpacity") === "true") {
-				discourse.foldUselessReplyOpacity();
+				functions.foldUselessReplyOpacity();
 			}
 			if (GM_getValue("replaceEmoji") !== "false") {
-				discourse.replaceEmoji(GM_getValue("replaceEmoji"));
+				functions.replaceEmoji(GM_getValue("replaceEmoji"));
 			}
 			if (GM_getValue("replaceTheme") !== "false") {
-				discourse.replaceTheme(GM_getValue("replaceTheme"));
+				functions.replaceTheme(GM_getValue("replaceTheme"));
 			}
 			if (GM_getValue("optimizeBiliPlayer") === "true") {
-				discourse.optimizeBiliPlayer();
+				functions.optimizeBiliPlayer();
 			}
 			if (GM_getValue("optimizePageText") === "true") {
-				discourse.optimizePageText();
+				functions.optimizePageText();
 			}
 			if (GM_getValue("newTabIndicator") === "true") {
-				discourse.newTabIndicator();
+				functions.newTabIndicator();
 			}
 			if (GM_getValue("a11yCloseButton") === "true") {
-				discourse.a11yCloseButton();
+				functions.a11yCloseButton();
 			}
 			if (GM_getValue("optimizeEditorButton") === "true") {
-				discourse.editor.optimizeInputButton();
+				functions.editor.optimizeInputButton();
 			}
 			if (GM_getValue("japaneseEditorButton") === "true") {
-				discourse.editor.japaneseInputButton();
-			}
-			if (GM_getValue("cdnAvatarReplace") === "true") {
-				discourse.cdnAvatarReplace();
+				functions.editor.japaneseInputButton();
 			}
 		}
 	}
